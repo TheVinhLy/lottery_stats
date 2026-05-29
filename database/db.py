@@ -17,7 +17,23 @@ try:
 except ImportError:
     pass
 
-DATABASE_URL = os.getenv("DATABASE_URL")  # Supabase connection string
+def _resolve_database_url() -> str:
+    """
+    Đọc DATABASE_URL theo thứ tự ưu tiên:
+    1. Biến môi trường (local .env, GitHub Actions)
+    2. st.secrets (Streamlit Cloud)
+    """
+    url = os.getenv("DATABASE_URL")
+    if url:
+        return url
+    try:
+        import streamlit as st
+        url = st.secrets.get("DATABASE_URL", "")
+        if url:
+            return url
+    except Exception:
+        pass
+    return ""
 
 
 class _PGConn:
@@ -62,15 +78,16 @@ class _PGConn:
 
 class Database:
     def __init__(self, db_path: str = None):
-        self.use_pg = bool(DATABASE_URL)
+        db_url = _resolve_database_url()
+        self.use_pg = bool(db_url)
         if self.use_pg:
-            self._pg_url = DATABASE_URL
+            self._pg_url = db_url
         else:
             if db_path is None:
                 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            db_path = os.path.join(base_dir, "data", "lottery.db")
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        self.db_path = db_path
+                db_path = os.path.join(base_dir, "data", "lottery.db")
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            self.db_path = db_path
         self._init_db()
 
     @contextmanager
