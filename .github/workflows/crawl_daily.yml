@@ -1,0 +1,44 @@
+name: Crawl xổ số hàng ngày
+
+on:
+  schedule:
+    # Chạy 18:30 UTC = 01:30 sáng ICT (+7) — sau khi kết quả đã có
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Ngày cụ thể (YYYY-MM-DD), để trống = hôm qua"
+        required: false
+        default: ""
+      days:
+        description: "Số ngày cần crawl"
+        required: false
+        default: "1"
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Crawl dữ liệu xổ số
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -n "${{ github.event.inputs.date }}" ]; then
+            python crawl_daily.py --date "${{ github.event.inputs.date }}" --days "${{ github.event.inputs.days }}"
+          else
+            python crawl_daily.py --days "${{ github.event.inputs.days || '1' }}"
+          fi
