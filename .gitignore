@@ -29,7 +29,7 @@ debug_fetch.py
 debug_fetch2.py
 debug_selenium.py
 debug_thu7.py
-fetch.py
+/fetch.py
 
 # Build artifacts
 dist/
