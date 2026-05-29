@@ -1,0 +1,53 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database (không commit dữ liệu lên git)
+data/lottery.db
+*.db
+*.sqlite3
+
+# Environment secrets
+.env
+
+# HTML debug dumps
+html_dump.html
+html_rendered.html
+html_thu7.html
+html_test_recent.html
+
+# Debug scripts (không cần thiết cho production)
+debug_fetch.py
+debug_fetch2.py
+debug_selenium.py
+debug_thu7.py
+fetch.py
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Excel exports
+*.xlsx
