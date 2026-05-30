@@ -44,14 +44,26 @@ def main():
     end = start + timedelta(days=max(0, args.days - 1))
 
     print(f"[CRAWL] Bắt đầu: {start} → {end} | Mock={args.mock}")
-    print(f"[CRAWL] DATABASE_URL set: {bool(os.getenv('DATABASE_URL'))}")
+    db_url = os.getenv("DATABASE_URL", "")
+    print(f"[CRAWL] DATABASE_URL set: {bool(db_url)}")
+    if db_url:
+        # Cảnh báo nếu dùng direct connection thay vì pooler
+        if "supabase.co:5432" in db_url or (":5432" in db_url and "pooler" not in db_url):
+            print("[CRAWL] ⚠️  DATABASE_URL đang dùng direct connection (port 5432).")
+            print("[CRAWL] ⚠️  GitHub Actions cần dùng Transaction Pooler (port 6543).")
+            print("[CRAWL] ⚠️  Vào Supabase → Settings → Database → Transaction pooler → copy URI.")
 
     from database.db import Database
     from crawler.fetch import fetch_api_by_date, generate_date_range
     from crawler.parser import parse_api_response, generate_mock_data
     from database.models import PROVINCES
 
-    db = Database()
+    try:
+        db = Database()
+    except Exception as e:
+        print(f"[CRAWL] ❌ Không kết nối được database: {e}")
+        print("[CRAWL] Kiểm tra DATABASE_URL — cần dùng Transaction Pooler URL (port 6543), không phải Direct Connection (port 5432).")
+        sys.exit(1)
     all_dates = list(generate_date_range(start, end))
     total   = len(all_dates)
     saved   = 0
