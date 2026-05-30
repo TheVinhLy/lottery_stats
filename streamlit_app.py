@@ -270,7 +270,7 @@ with tab_update:
     col_l, col_r = st.columns([1, 2])
     with col_l:
         st.subheader("⚙️ Cấu hình")
-        upd_from = st.date_input("Từ ngày", value=date.today() - timedelta(days=7), key="upd_from")
+        upd_from = st.date_input("Từ ngày", value=date.today(), key="upd_from")
         upd_to   = st.date_input("Đến ngày", value=date.today(), key="upd_to")
         upd_prov = st.selectbox("Tỉnh/Thành", PROV_LIST, key="upd_prov")
         use_mock = st.checkbox("🧪 Chế độ Demo (không cần internet)", value=False)
