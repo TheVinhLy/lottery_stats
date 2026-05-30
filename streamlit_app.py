@@ -210,6 +210,14 @@ st.markdown("""
 
 PROV_LIST = ["Tất cả"] + list(PROVINCES.keys())
 
+
+def _sdf(df):
+    """Màu xen kẽ dòng cho dataframe qua Pandas Styler."""
+    def _alt(row):
+        color = "#232840" if row.name % 2 == 0 else "#1B2035"
+        return [f"background-color: {color}; color: #CBD5E1"] * len(row)
+    return df.style.apply(_alt, axis=1)
+
 # ══════════════════════════════════════════════════════════════════════════
 # Khởi tạo Database (cache_resource: chỉ tạo 1 lần)
 # ══════════════════════════════════════════════════════════════════════════
@@ -401,14 +409,6 @@ def _filter_row(prefix: str, default_days: int = 90):
         st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         btn = st.button("📊 Phân Tích", key=f"{prefix}_btn", type="primary", use_container_width=True)
     return d_from, d_to, prov, btn
-
-
-def _sdf(df):
-    """Áp dụng màu xen kẽ dòng (odd/even) cho dataframe qua Pandas Styler."""
-    def _alt(row):
-        color = "#232840" if row.name % 2 == 0 else "#1B2035"
-        return [f"background-color: {color}; color: #CBD5E1"] * len(row)
-    return df.style.apply(_alt, axis=1)
 
 
 # Bảng màu Plotly dùng chung (tông Indigo-Teal, dịu mắt)
