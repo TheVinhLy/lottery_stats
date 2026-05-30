@@ -52,12 +52,19 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    /* ── Ẩn toolbar mặc định của Streamlit (che mất header app) ── */
+    header[data-testid="stHeader"] { display: none !important; }
+    #MainMenu { display: none !important; }
+    footer { display: none !important; }
+
     /* ── Nền & typography ── */
     .stApp { background-color: #1B1F2E; }
     .block-container {
-        padding-top: 1.2rem;
+        padding-top: 0.8rem;
         padding-bottom: 0.5rem;
-        max-width: 1400px;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        max-width: 100% !important;
     }
     body, p, span, div, label {
         color: #CBD5E1 !important;
