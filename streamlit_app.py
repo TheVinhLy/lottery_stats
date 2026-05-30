@@ -210,6 +210,64 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
+    /* ── Date picker popup / calendar ── */
+    [data-baseweb="calendar"] {
+        background-color: #232840 !important;
+        border: 1px solid #4338CA !important;
+        border-radius: 10px !important;
+    }
+    [data-baseweb="calendar"] * {
+        color: #F1F5F9 !important;
+    }
+    /* Header tháng/năm */
+    [data-baseweb="calendar"] [data-baseweb="select"] > div,
+    [data-baseweb="calendar"] button {
+        background-color: #2C3252 !important;
+        color: #F1F5F9 !important;
+        font-size: 1.0rem !important;
+    }
+    /* Ngày bình thường */
+    [data-baseweb="calendar"] [aria-label]:not([disabled]) {
+        background-color: transparent !important;
+        color: #F1F5F9 !important;
+        font-size: 1.0rem !important;
+    }
+    /* Hover ngày */
+    [data-baseweb="calendar"] [aria-label]:hover {
+        background-color: #3D4A7A !important;
+        color: #FFFFFF !important;
+        border-radius: 50% !important;
+    }
+    /* Ngày đang chọn */
+    [data-baseweb="calendar"] [aria-selected="true"] {
+        background-color: #4338CA !important;
+        color: #FFFFFF !important;
+        border-radius: 50% !important;
+    }
+    /* Ngày hôm nay */
+    [data-baseweb="calendar"] [data-today="true"] {
+        border: 2px solid #818CF8 !important;
+        border-radius: 50% !important;
+    }
+    /* Tên thứ (Mon, Tue...) */
+    [data-baseweb="calendar"] [data-baseweb="day-label"] {
+        color: #818CF8 !important;
+        font-weight: 600 !important;
+    }
+    /* Nút prev/next tháng */
+    [data-baseweb="calendar"] button[aria-label*="previous"],
+    [data-baseweb="calendar"] button[aria-label*="next"],
+    [data-baseweb="calendar"] button[aria-label*="Previous"],
+    [data-baseweb="calendar"] button[aria-label*="Next"] {
+        background-color: #3730A3 !important;
+        color: #FFFFFF !important;
+        border-radius: 6px !important;
+    }
+    /* Popover wrapper của date picker */
+    [data-baseweb="popover"] {
+        background-color: #232840 !important;
+    }
+
     /* ── Dataframe ── */
     .stDataFrame {
         border-radius: 8px;
