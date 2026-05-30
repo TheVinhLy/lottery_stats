@@ -2,12 +2,12 @@ name: Crawl xổ số hàng ngày
 
 on:
   schedule:
-    # Chạy 18:30 UTC = 01:30 sáng ICT (+7) — sau khi kết quả đã có
-    - cron: "30 18 * * *"
+    # Chạy 20:05 giờ Việt Nam (13:05 UTC)
+    - cron: "5 13 * * *"
   workflow_dispatch:
     inputs:
       date:
-        description: "Ngày cụ thể (YYYY-MM-DD), để trống = hôm qua"
+        description: "Ngày cụ thể (YYYY-MM-DD), để trống = hôm nay"
         required: false
         default: ""
       days:
