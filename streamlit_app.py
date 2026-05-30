@@ -61,6 +61,11 @@ st.markdown("""
     [data-testid="stDecoration"] { display: none !important; }
     button[title="Deploy this app"] { display: none !important; }
     button[kind="header"] { display: none !important; }
+    /* Ẩn toàn bộ top-right action bar */
+    .stAppToolbar { display: none !important; }
+    [data-testid="stAppViewContainer"] > section:first-child > div[class*="toolbar"] { display: none !important; }
+    div[class*="StatusWidget"] { display: none !important; }
+    div[class*="viewerBadge"] { display: none !important; }
 
     /* ── Nền & typography ── */
     .stApp { background-color: #1B1F2E; }
@@ -379,7 +384,7 @@ with tab_update:
 
 with tab_results:
     r_c1, r_c2, r_c3, r_c4, r_c5 = st.columns([2, 2, 3, 1, 1])
-    with r_c1: res_from = st.date_input("Từ", date(2026, 1, 1), key="res_from")
+    with r_c1: res_from = st.date_input("Từ", date.today(), key="res_from")
     with r_c2: res_to   = st.date_input("Đến", date.today(), key="res_to")
     with r_c3: res_prov = st.selectbox("Tỉnh", PROV_LIST, key="res_prov")
     with r_c4:
