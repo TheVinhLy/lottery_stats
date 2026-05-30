@@ -273,7 +273,6 @@ with tab_update:
         upd_from = st.date_input("Từ ngày", value=date.today(), key="upd_from")
         upd_to   = st.date_input("Đến ngày", value=date.today(), key="upd_to")
         upd_prov = st.selectbox("Tỉnh/Thành", PROV_LIST, key="upd_prov")
-        use_mock = st.checkbox("🧪 Chế độ Demo (không cần internet)", value=False)
 
         st.markdown("")
         btn_start = st.button("▶ CẬP NHẬT DỮ LIỆU", type="primary", use_container_width=True)
@@ -288,7 +287,7 @@ with tab_update:
 
         if btn_start:
             from crawler.fetch import fetch_api_by_date, generate_date_range
-            from crawler.parser import parse_api_response, generate_mock_data
+            from crawler.parser import parse_api_response
 
             all_dates = list(generate_date_range(upd_from, upd_to))
             total  = len(all_dates)
@@ -311,17 +310,7 @@ with tab_update:
                 dstr = cur_date.strftime("%Y-%m-%d")
                 progress.progress(pct, text=f"[{idx}/{total}] {dstr}")
 
-                if use_mock:
-                    mock_provs = [upd_prov] if filter_prov else list(PROVINCES.keys())[:3]
-                    for pv in mock_provs:
-                        rec = generate_mock_data(cur_date, pv)
-                        if db.save_result(rec):
-                            saved += 1
-                        else:
-                            skipped += 1
-                    write_log(f"[{idx}/{total}] Demo {dstr} → {len(mock_provs)} tỉnh")
-                else:
-                    api_data = fetch_api_by_date(cur_date)
+                api_data = fetch_api_by_date(cur_date)
                     if api_data:
                         records = parse_api_response(api_data, cur_date)
                         day_saved = 0
@@ -334,8 +323,8 @@ with tab_update:
                             else:
                                 skipped += 1
                         write_log(f"[{idx}/{total}] {dstr} → lưu {day_saved} tỉnh", "ok")
-                    else:
-                        write_log(f"[{idx}/{total}] Không có dữ liệu: {dstr}", "warn")
+                else:
+                    write_log(f"[{idx}/{total}] Không có dữ liệu: {dstr}", "warn")
 
             progress.progress(1.0, text="Hoàn thành!")
             write_log(f"Xong! Đã lưu {saved} | Bỏ qua {skipped}", "ok")
