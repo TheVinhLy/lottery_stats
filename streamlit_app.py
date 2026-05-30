@@ -175,7 +175,7 @@ st.markdown("""
         background-color: #2C3252 !important;
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
-        color: #818CF8 !important;
+        color: #F1F5F9 !important;
         font-size: 1.05rem !important;
     }
     .stSelectbox > div > div,
@@ -183,13 +183,13 @@ st.markdown("""
         background-color: #2C3252 !important;
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
-        color: #818CF8 !important;
+        color: #F1F5F9 !important;
         font-size: 1.05rem !important;
     }
     /* Chữ hiển thị trong ô selectbox đã chọn */
     .stSelectbox [data-baseweb="select"] span,
     .stSelectbox [data-baseweb="select"] div {
-        color: #818CF8 !important;
+        color: #F1F5F9 !important;
         font-size: 1.05rem !important;
     }
     /* ── Dropdown list khi mở ra ── */
@@ -198,7 +198,7 @@ st.markdown("""
     }
     [data-baseweb="option"] {
         background-color: #2C3252 !important;
-        color: #F1F5F9 !important;
+        color: #818CF8 !important;
         font-size: 1.05rem !important;
     }
     [data-baseweb="option"]:hover {
