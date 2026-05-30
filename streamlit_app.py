@@ -350,7 +350,7 @@ with tab_update:
 
 with tab_results:
     r_c1, r_c2, r_c3, r_c4, r_c5 = st.columns([2, 2, 3, 1, 1])
-    with r_c1: res_from = st.date_input("Từ", date.today() - timedelta(days=30), key="res_from")
+    with r_c1: res_from = st.date_input("Từ", date(2026, 1, 1), key="res_from")
     with r_c2: res_to   = st.date_input("Đến", date.today(), key="res_to")
     with r_c3: res_prov = st.selectbox("Tỉnh", PROV_LIST, key="res_prov")
     with r_c4:
@@ -402,7 +402,7 @@ with tab_results:
 def _filter_row(prefix: str, default_days: int = 90):
     """Thanh filter ngày + tỉnh dùng chung cho các tab thống kê."""
     c1, c2, c3, c4 = st.columns([2, 2, 3, 1])
-    with c1: d_from = st.date_input("Từ", date.today() - timedelta(days=default_days), key=f"{prefix}_from")
+    with c1: d_from = st.date_input("Từ", date(2026, 1, 1), key=f"{prefix}_from")
     with c2: d_to   = st.date_input("Đến", date.today(), key=f"{prefix}_to")
     with c3: prov   = st.selectbox("Tỉnh", PROV_LIST, key=f"{prefix}_prov")
     with c4:
