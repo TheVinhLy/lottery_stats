@@ -201,6 +201,18 @@ st.markdown("""
         color: #818CF8 !important;
         font-size: 1.05rem !important;
     }
+    [data-baseweb="option"] * {
+        color: #818CF8 !important;
+    }
+    [data-baseweb="menu"] li,
+    [data-baseweb="menu"] span,
+    [data-baseweb="menu"] div,
+    [role="option"],
+    [role="listbox"] li,
+    [role="listbox"] span {
+        color: #818CF8 !important;
+        font-size: 1.05rem !important;
+    }
     [data-baseweb="option"]:hover {
         background-color: #3D4A7A !important;
         color: #FFFFFF !important;
