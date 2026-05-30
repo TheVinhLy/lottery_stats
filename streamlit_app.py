@@ -32,7 +32,7 @@ from reports.export_excel import export_results
 # ══════════════════════════════════════════════════════════════════════════
 
 st.set_page_config(
-    page_title="🎯 Thống Kê Xổ Số Miền Nam",
+    page_title="Thống Kê Xổ Số Miền Nam",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="collapsed",
