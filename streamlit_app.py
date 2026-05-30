@@ -346,10 +346,10 @@ with tab_results:
     with r_c2: res_to   = st.date_input("Đến", date.today(), key="res_to")
     with r_c3: res_prov = st.selectbox("Tỉnh", PROV_LIST, key="res_prov")
     with r_c4:
-        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         res_btn = st.button("🔍 Xem", key="res_btn", type="primary", use_container_width=True)
     with r_c5:
-        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         exp_btn = st.button("📊 Excel", key="res_exp", use_container_width=True)
 
     if res_btn or "res_data" not in st.session_state:
@@ -366,7 +366,7 @@ with tab_results:
             "prize_3","prize_4","prize_5","prize_6","prize_7","prize_8"]]
         df_res.columns = ["Ngày","Tỉnh","Đặc Biệt","Giải 1","Giải 2",
                           "Giải 3","Giải 4","Giải 5","Giải 6","Giải 7","Giải 8"]
-        st.dataframe(df_res, use_container_width=True, height=520)
+        st.dataframe(_sdf(df_res), use_container_width=True, height=520)
 
         if exp_btn:
             buf = io.BytesIO()
@@ -398,9 +398,17 @@ def _filter_row(prefix: str, default_days: int = 90):
     with c2: d_to   = st.date_input("Đến", date.today(), key=f"{prefix}_to")
     with c3: prov   = st.selectbox("Tỉnh", PROV_LIST, key=f"{prefix}_prov")
     with c4:
-        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         btn = st.button("📊 Phân Tích", key=f"{prefix}_btn", type="primary", use_container_width=True)
     return d_from, d_to, prov, btn
+
+
+def _sdf(df):
+    """Áp dụng màu xen kẽ dòng (odd/even) cho dataframe qua Pandas Styler."""
+    def _alt(row):
+        color = "#232840" if row.name % 2 == 0 else "#1B2035"
+        return [f"background-color: {color}; color: #CBD5E1"] * len(row)
+    return df.style.apply(_alt, axis=1)
 
 
 # Bảng màu Plotly dùng chung (tông Indigo-Teal, dịu mắt)
@@ -471,13 +479,13 @@ with tab_lo2:
             st.plotly_chart(fig, use_container_width=True)
 
             st.caption(f"Tổng {total_cnt:,} lượt xuất hiện | {len(items)} số khác nhau")
-            st.dataframe(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True),
+            st.dataframe(_sdf(df_lo2[[“Rank”,“Số”,“Lần XH”,“Tỷ lệ %”]].reset_index(drop=True)),
                          use_container_width=True, height=300)
 
         with col_right:
             st.markdown("### 🔥 Top 10 Nóng nhất")
             hot_df = df_lo2.head(10)[["Số","Lần XH"]]
-            st.dataframe(hot_df, use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(hot_df), use_container_width=True, hide_index=True)
 
             st.markdown("### ❄️ Top 10 Lạnh nhất")
             # Đưa các số chưa xuất hiện lên đầu
@@ -488,7 +496,7 @@ with tab_lo2:
                                      columns=["Số","Lần XH"])
             if cold_rows:
                 cold_df = pd.DataFrame(cold_rows)
-            st.dataframe(cold_df, use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(cold_df), use_container_width=True, hide_index=True)
 
             # Lô Gan
             st.markdown("### ⏳ Lô Gan (lâu không về)")
@@ -496,7 +504,7 @@ with tab_lo2:
             gan_df = pd.DataFrame(gan)[["number","last_date","days_absent"]]
             gan_df.columns = ["Số","Lần cuối","Kỳ vắng"]
             gan_df["Kỳ vắng"] = gan_df["Kỳ vắng"].apply(lambda x: "Chưa XH" if x >= 9999 else x)
-            st.dataframe(gan_df, use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(gan_df), use_container_width=True, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -526,11 +534,11 @@ with tab_lo3:
             df_top100 = df_lo3.head(100)
             fig3 = _bar_chart(df_top100, "3 Số", "Lần XH", "Top 100 tần suất 3 số cuối")
             st.plotly_chart(fig3, use_container_width=True)
-            st.dataframe(df_lo3.head(100), use_container_width=True, height=280, hide_index=True)
+            st.dataframe(_sdf(df_lo3.head(100)), use_container_width=True, height=280, hide_index=True)
 
         with col_r3:
             st.markdown("### 🔥 Top 15 hay gặp")
-            st.dataframe(df_lo3.head(15), use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(df_lo3.head(15)), use_container_width=True, hide_index=True)
 
             st.markdown("### ⏳ Lô Gan 3 số")
             gan3 = st.session_state.get("lo3_gan", [])
@@ -538,7 +546,7 @@ with tab_lo3:
                 df_g3 = pd.DataFrame(gan3)[["number","last_date","days_absent"]]
                 df_g3.columns = ["3 Số","Lần cuối","Kỳ vắng"]
                 df_g3["Kỳ vắng"] = df_g3["Kỳ vắng"].apply(lambda x: "Chưa XH" if x >= 9999 else x)
-                st.dataframe(df_g3, use_container_width=True, hide_index=True)
+                st.dataframe(_sdf(df_g3), use_container_width=True, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -566,10 +574,10 @@ with tab_lo4:
         with col_l4:
             fig4 = _bar_chart(df_lo4.head(60), "4 Số", "Lần XH", "Top 60 tần suất 4 số")
             st.plotly_chart(fig4, use_container_width=True)
-            st.dataframe(df_lo4.head(100), use_container_width=True, height=280, hide_index=True)
+            st.dataframe(_sdf(df_lo4.head(100)), use_container_width=True, height=280, hide_index=True)
         with col_r4:
             st.markdown("### 🔥 Top 20 hay gặp")
-            st.dataframe(df_lo4.head(20), use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(df_lo4.head(20)), use_container_width=True, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -597,10 +605,10 @@ with tab_lo5:
         with col_l5:
             fig5 = _bar_chart(df_lo5.head(60), "5 Số", "Lần XH", "Top 60 tần suất 5 số")
             st.plotly_chart(fig5, use_container_width=True)
-            st.dataframe(df_lo5.head(100), use_container_width=True, height=280, hide_index=True)
+            st.dataframe(_sdf(df_lo5.head(100)), use_container_width=True, height=280, hide_index=True)
         with col_r5:
             st.markdown("### 🔥 Top 20 hay gặp")
-            st.dataframe(df_lo5.head(20), use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(df_lo5.head(20)), use_container_width=True, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -628,7 +636,7 @@ with tab_special:
                                  columns=["2 Cuối","Lần XH"])
             fig_l2 = _bar_chart(df_l2, "2 Cuối", "Lần XH", "2 số cuối ĐB", "Purp")
             st.plotly_chart(fig_l2, use_container_width=True)
-            st.dataframe(df_l2, use_container_width=True, height=250, hide_index=True)
+            st.dataframe(_sdf(df_l2), use_container_width=True, height=250, hide_index=True)
 
         with col_b:
             st.markdown("### 🏅 3 Số Cuối Giải ĐB")
@@ -636,7 +644,7 @@ with tab_special:
                                  columns=["3 Cuối","Lần XH"])
             fig_l3 = _bar_chart(df_l3, "3 Cuối", "Lần XH", "3 số cuối ĐB", "Teal")
             st.plotly_chart(fig_l3, use_container_width=True)
-            st.dataframe(df_l3, use_container_width=True, height=250, hide_index=True)
+            st.dataframe(_sdf(df_l3), use_container_width=True, height=250, hide_index=True)
 
         with col_c:
             st.markdown("### 📜 Lịch sử Giải Đặc Biệt")
@@ -647,7 +655,7 @@ with tab_special:
                 df_hist["3 Cuối"] = df_hist["number"].str[-3:]
                 df_hist = df_hist[["date","province","number","2 Cuối","3 Cuối"]]
                 df_hist.columns = ["Ngày","Tỉnh","Giải ĐB","2 Cuối","3 Cuối"]
-                st.dataframe(df_hist, use_container_width=True, height=560, hide_index=True)
+                st.dataframe(_sdf(df_hist), use_container_width=True, height=560, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -661,7 +669,7 @@ with tab_suggest:
     with sug_c2:
         sug_prov = st.selectbox("Tỉnh", PROV_LIST, key="sug_prov")
     with sug_c3:
-        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         sug_btn = st.button("💡 Gợi Ý", key="sug_btn", type="primary", use_container_width=True)
 
     st.caption(
@@ -688,7 +696,7 @@ with tab_suggest:
             if hot:
                 df_hot = pd.DataFrame(hot)[["number","count","reason"]]
                 df_hot.columns = ["Số","Lần/30 ngày","Ghi chú"]
-                st.dataframe(df_hot, use_container_width=True, hide_index=True)
+                st.dataframe(_sdf(df_hot), use_container_width=True, hide_index=True)
 
         with col_s2:
             st.markdown("### ❄️ Số Lạnh / Gan")
@@ -699,7 +707,7 @@ with tab_suggest:
                     lambda x: "Chưa XH" if x >= 9999 else x)
                 df_cold = df_cold[["number","days_absent","reason"]]
                 df_cold.columns = ["Số","Kỳ vắng","Ghi chú"]
-                st.dataframe(df_cold, use_container_width=True, hide_index=True)
+                st.dataframe(_sdf(df_cold), use_container_width=True, hide_index=True)
 
         with col_s3:
             st.markdown("### ⚡ Số Cầu (7 ngày)")
@@ -707,7 +715,7 @@ with tab_suggest:
             if cau:
                 df_cau = pd.DataFrame(cau)[["number","count","reason"]]
                 df_cau.columns = ["Số","Kỳ liên tiếp","Ghi chú"]
-                st.dataframe(df_cau, use_container_width=True, hide_index=True)
+                st.dataframe(_sdf(df_cau), use_container_width=True, hide_index=True)
             else:
                 st.caption("Không có số cầu (chưa có số nào xuất hiện ≥3 kỳ)")
 
@@ -717,7 +725,7 @@ with tab_suggest:
             if theo_db:
                 df_tdb = pd.DataFrame(theo_db)[["number","from_special","date"]]
                 df_tdb.columns = ["2 Cuối","Từ ĐB","Ngày"]
-                st.dataframe(df_tdb, use_container_width=True, hide_index=True)
+                st.dataframe(_sdf(df_tdb), use_container_width=True, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -731,7 +739,7 @@ with tab_cycle:
     with cy_c2:
         cyc_prov = st.selectbox("Tỉnh", PROV_LIST, key="cyc_prov")
     with cy_c3:
-        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:2.15rem"></div>', unsafe_allow_html=True)
         cyc_btn = st.button("🔄 Phân Tích", key="cyc_btn", type="primary", use_container_width=True)
 
     if cyc_btn:
@@ -768,7 +776,7 @@ with tab_cycle:
                     hist_rows.append({"#": i+1, "Ngày XH": d,
                                       "Cách kỳ trước (ngày)": gap if gap is not None else "—"})
                 df_cyc = pd.DataFrame(hist_rows)
-                st.dataframe(df_cyc, use_container_width=True, height=440, hide_index=True)
+                st.dataframe(_sdf(df_cyc), use_container_width=True, height=440, hide_index=True)
 
                 # Timeline chart
                 if cycles:
@@ -850,7 +858,7 @@ with tab_headtail:
                               template="plotly_dark", title="Phân bố đầu số")
             fig_head.update_layout(**_chart_layout())
             st.plotly_chart(fig_head, use_container_width=True)
-            st.dataframe(df_head, use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(df_head), use_container_width=True, hide_index=True)
 
         with col_t:
             st.markdown("### 🔢 Đuôi số (chữ số cuối)")
@@ -862,7 +870,7 @@ with tab_headtail:
                               template="plotly_dark", title="Phân bố đuôi số")
             fig_tail.update_layout(**_chart_layout())
             st.plotly_chart(fig_tail, use_container_width=True)
-            st.dataframe(df_tail, use_container_width=True, hide_index=True)
+            st.dataframe(_sdf(df_tail), use_container_width=True, hide_index=True)
 
         with col_m:
             st.markdown("### 🔲 Ma trận Đầu × Đuôi")
