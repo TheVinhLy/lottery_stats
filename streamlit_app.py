@@ -55,7 +55,7 @@ st.markdown("""
     /* ── Ẩn toolbar mặc định của Streamlit (che mất header app) ── */
     header[data-testid="stHeader"] { display: none !important; }
     #MainMenu { display: none !important; }
-    footer { display: none !important; }
+    footer { display: none !important; visibility: hidden !important; }
     /* Ẩn nút Deploy và Share trên toolbar */
     [data-testid="stToolbar"] { display: none !important; }
     [data-testid="stDecoration"] { display: none !important; }
@@ -66,6 +66,12 @@ st.markdown("""
     [data-testid="stAppViewContainer"] > section:first-child > div[class*="toolbar"] { display: none !important; }
     div[class*="StatusWidget"] { display: none !important; }
     div[class*="viewerBadge"] { display: none !important; }
+    /* Ẩn badge "Hosted with Streamlit" + "Created by" ở bottom */
+    [data-testid="stBottom"] { display: none !important; }
+    [data-testid="stBottomBlockContainer"] { display: none !important; }
+    .st-emotion-cache-zq5wmm { display: none !important; }
+    .viewerBadge_container__r5tak { display: none !important; }
+    #stDecoration { display: none !important; }
 
     /* ── Nền & typography ── */
     .stApp { background-color: #1B1F2E; }
