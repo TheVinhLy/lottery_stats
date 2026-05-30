@@ -183,7 +183,12 @@ st.markdown("""
 
     /* ── Caption / divider ── */
     .stCaption { color: #64748B !important; font-size: 0.78rem !important; }
-    hr { border-color: #374151 !important; }
+    hr { border-color: #374151 !important; margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
+
+    /* ── Căn nút Phân Tích ngang hàng với input ── */
+    div[data-testid="stVerticalBlock"] .stButton-align-label label {
+        visibility: hidden;
+    }
 
     /* ── Progress bar ── */
     .stProgress > div > div { background-color: #818CF8 !important; }
@@ -227,7 +232,7 @@ with col_h3:
         st.cache_resource.clear()
         st.rerun()
 
-st.divider()
+st.markdown('<div style="margin-top:0.3rem"></div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════
 # 10 Tabs
@@ -386,7 +391,7 @@ def _filter_row(prefix: str, default_days: int = 90):
     with c2: d_to   = st.date_input("Đến", date.today(), key=f"{prefix}_to")
     with c3: prov   = st.selectbox("Tỉnh", PROV_LIST, key=f"{prefix}_prov")
     with c4:
-        st.markdown("&nbsp;")
+        st.markdown('<label style="display:block;font-size:0.875rem;margin-bottom:0.25rem;visibility:hidden">x</label>', unsafe_allow_html=True)
         btn = st.button("📊 Phân Tích", key=f"{prefix}_btn", type="primary", use_container_width=True)
     return d_from, d_to, prov, btn
 
