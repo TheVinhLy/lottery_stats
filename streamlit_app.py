@@ -218,7 +218,7 @@ st.markdown("""
     }
     [data-baseweb="calendar"] * {
         background-color: #1B1F2E !important;
-        color: #F1F5F9 !important;
+        color: #818CF8 !important;
     }
     /* Header tháng/năm */
     [data-baseweb="calendar"] [data-baseweb="select"] > div,
