@@ -83,12 +83,16 @@ st.markdown("""
         background-color: #1B1F2E !important;
     }
     .block-container {
-        padding-top: 0.8rem;
+        padding-top: 0.2rem;
         padding-bottom: 0.5rem;
         padding-left: 1.5rem;
         padding-right: 1.5rem;
         max-width: 100% !important;
     }
+    /* Ẩn khoảng trống phía trên do stApp tạo ra */
+    .stApp > header { display: none !important; }
+    [data-testid="stAppViewContainer"] { padding-top: 0 !important; }
+    .main .block-container { margin-top: 0 !important; }
     body, p, span, div, label {
         color: #CBD5E1 !important;
         font-family: 'Inter', 'Segoe UI', sans-serif;
