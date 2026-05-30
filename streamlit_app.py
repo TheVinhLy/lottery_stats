@@ -159,6 +159,22 @@ st.markdown("""
         border-radius: 6px !important;
         color: #E2E8F0 !important;
     }
+    /* ── Dropdown list khi mở ra ── */
+    [data-baseweb="popover"] [data-baseweb="menu"] {
+        background-color: #2C3252 !important;
+    }
+    [data-baseweb="option"] {
+        background-color: #2C3252 !important;
+        color: #E2E8F0 !important;
+    }
+    [data-baseweb="option"]:hover {
+        background-color: #3D4A7A !important;
+        color: #FFFFFF !important;
+    }
+    [aria-selected="true"][data-baseweb="option"] {
+        background-color: #4338CA !important;
+        color: #FFFFFF !important;
+    }
 
     /* ── Dataframe ── */
     .stDataFrame {
