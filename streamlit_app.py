@@ -56,6 +56,11 @@ st.markdown("""
     header[data-testid="stHeader"] { display: none !important; }
     #MainMenu { display: none !important; }
     footer { display: none !important; }
+    /* Ẩn nút Deploy và Share trên toolbar */
+    [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stDecoration"] { display: none !important; }
+    button[title="Deploy this app"] { display: none !important; }
+    button[kind="header"] { display: none !important; }
 
     /* ── Nền & typography ── */
     .stApp { background-color: #1B1F2E; }
