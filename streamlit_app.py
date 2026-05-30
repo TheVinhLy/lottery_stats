@@ -339,6 +339,33 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Inject JS để force màu chữ dropdown vì CSS không đủ mạnh với Streamlit portal
+st.components.v1.html("""
+<script>
+function applyDropdownStyle() {
+    const COLOR = '#6366F1';
+    const BG = '#1B1F2E';
+    const selectors = [
+        '[data-baseweb="option"]',
+        '[data-baseweb="menu"] li',
+        '[data-baseweb="menu"] div',
+        '[role="option"]',
+        '[role="listbox"] li',
+    ];
+    selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+            el.style.setProperty('color', COLOR, 'important');
+            el.style.setProperty('background-color', BG, 'important');
+        });
+    });
+}
+// Quan sát DOM thay đổi (khi dropdown mở)
+const observer = new MutationObserver(applyDropdownStyle);
+observer.observe(document.body, { childList: true, subtree: true });
+applyDropdownStyle();
+</script>
+""", height=0)
+
 PROV_LIST = ["Tất cả"] + list(PROVINCES.keys())
 
 
