@@ -159,13 +159,22 @@ st.markdown("""
         background-color: #2C3252 !important;
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
-        color: #E2E8F0 !important;
+        color: #F1F5F9 !important;
+        font-size: 1.05rem !important;
     }
-    .stSelectbox > div > div {
+    .stSelectbox > div > div,
+    .stSelectbox [data-baseweb="select"] > div {
         background-color: #2C3252 !important;
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
-        color: #E2E8F0 !important;
+        color: #F1F5F9 !important;
+        font-size: 1.05rem !important;
+    }
+    /* Chữ hiển thị trong ô selectbox đã chọn */
+    .stSelectbox [data-baseweb="select"] span,
+    .stSelectbox [data-baseweb="select"] div {
+        color: #F1F5F9 !important;
+        font-size: 1.05rem !important;
     }
     /* ── Dropdown list khi mở ra ── */
     [data-baseweb="popover"] [data-baseweb="menu"] {
@@ -173,7 +182,8 @@ st.markdown("""
     }
     [data-baseweb="option"] {
         background-color: #2C3252 !important;
-        color: #E2E8F0 !important;
+        color: #F1F5F9 !important;
+        font-size: 1.05rem !important;
     }
     [data-baseweb="option"]:hover {
         background-color: #3D4A7A !important;
@@ -194,12 +204,12 @@ st.markdown("""
         background-color: #2C3252 !important;
         color: #A5B4FC !important;
         font-weight: 600;
-        font-size: 1.0rem !important;
+        font-size: 1.1rem !important;
         border-bottom: 2px solid #4338CA !important;
     }
     /* Alternating rows: chẵn đậm, lẻ nhạt hơn */
-    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.0rem !important; }
-    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.0rem !important; }
+    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.1rem !important; }
+    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.1rem !important; }
     .stDataFrame tbody tr:hover td { background-color: #2C3252 !important; }
 
     /* ── Căn nút hàng filter ngang hàng input ── */
