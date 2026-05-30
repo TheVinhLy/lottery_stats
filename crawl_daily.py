@@ -3,7 +3,7 @@ crawl_daily.py — Script chạy tự động bởi GitHub Actions mỗi ngày.
 Crawl kết quả hôm qua (hoặc hôm nay) rồi lưu vào Supabase.
 
 Chạy thủ công:
-    python crawl_daily.py               # crawl hôm qua
+    python crawl_daily.py               # crawl hôm nay
     python crawl_daily.py --date 2026-05-01          # crawl ngày cụ thể
     python crawl_daily.py --days 7                   # crawl 7 ngày gần nhất
     python crawl_daily.py --date 2026-04-01 --days 30  # crawl 30 ngày từ ngày đó
@@ -27,7 +27,7 @@ except ImportError:
 def main():
     parser = argparse.ArgumentParser(description="Crawl dữ liệu xổ số miền Nam")
     parser.add_argument("--date",  type=str, default=None,
-                        help="Ngày bắt đầu YYYY-MM-DD (mặc định: hôm qua)")
+                        help="Ngày bắt đầu YYYY-MM-DD (mặc định: hôm nay)")
     parser.add_argument("--days",  type=int, default=1,
                         help="Số ngày cần crawl (mặc định: 1)")
     parser.add_argument("--mock",  action="store_true",
@@ -39,7 +39,7 @@ def main():
         from datetime import datetime
         start = datetime.strptime(args.date, "%Y-%m-%d").date()
     else:
-        start = date.today() - timedelta(days=1)  # hôm qua
+        start = date.today()  # hôm nay
 
     end = start + timedelta(days=max(0, args.days - 1))
 

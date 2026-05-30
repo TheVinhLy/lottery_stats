@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       date:
-        description: "Ngày crawl (YYYY-MM-DD), bỏ trống = hôm qua"
+        description: "Ngày crawl (YYYY-MM-DD), bỏ trống = hôm nay"
         required: false
         default: ""
       days:
