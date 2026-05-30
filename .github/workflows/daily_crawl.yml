@@ -1,9 +1,9 @@
 name: Daily Lottery Crawl
 
 on:
-  # Chạy tự động mỗi ngày lúc 18:30 giờ Việt Nam (11:30 UTC)
+  # Chạy tự động mỗi ngày lúc 17:05 giờ Việt Nam (10:05 UTC)
   schedule:
-    - cron: "30 11 * * *"
+    - cron: "5 10 * * *"
 
   # Cho phép chạy thủ công từ GitHub Actions UI
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install requests beautifulsoup4 lxml psycopg2-binary python-dotenv
+          pip install -r requirements.txt
 
       - name: Run crawler
         env:
