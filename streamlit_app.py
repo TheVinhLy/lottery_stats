@@ -172,8 +172,15 @@ st.markdown("""
         font-weight: 600;
         border-bottom: 2px solid #4338CA !important;
     }
-    .stDataFrame tbody tr:nth-child(even) td { background-color: #1F2437 !important; }
+    /* Alternating rows: chẵn đậm, lẻ nhạt hơn */
+    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; }
+    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; }
     .stDataFrame tbody tr:hover td { background-color: #2C3252 !important; }
+
+    /* ── Căn nút hàng filter ngang hàng input ── */
+    /* Ẩn label giả (dùng để đẩy nút xuống đúng vị trí) */
+    label.btn-spacer-label { visibility: hidden; display: block;
+        font-size: 0.875rem; margin-bottom: 0.25rem; }
 
     /* ── Info / Success / Warning boxes ── */
     .stInfo    { background-color: #1E293B !important; border-left: 4px solid #818CF8 !important; }
@@ -339,10 +346,10 @@ with tab_results:
     with r_c2: res_to   = st.date_input("Đến", date.today(), key="res_to")
     with r_c3: res_prov = st.selectbox("Tỉnh", PROV_LIST, key="res_prov")
     with r_c4:
-        st.markdown("&nbsp;")
+        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
         res_btn = st.button("🔍 Xem", key="res_btn", type="primary", use_container_width=True)
     with r_c5:
-        st.markdown("&nbsp;")
+        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
         exp_btn = st.button("📊 Excel", key="res_exp", use_container_width=True)
 
     if res_btn or "res_data" not in st.session_state:
@@ -391,7 +398,7 @@ def _filter_row(prefix: str, default_days: int = 90):
     with c2: d_to   = st.date_input("Đến", date.today(), key=f"{prefix}_to")
     with c3: prov   = st.selectbox("Tỉnh", PROV_LIST, key=f"{prefix}_prov")
     with c4:
-        st.markdown('<label style="display:block;font-size:0.875rem;margin-bottom:0.25rem;visibility:hidden">x</label>', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
         btn = st.button("📊 Phân Tích", key=f"{prefix}_btn", type="primary", use_container_width=True)
     return d_from, d_to, prov, btn
 
@@ -654,7 +661,7 @@ with tab_suggest:
     with sug_c2:
         sug_prov = st.selectbox("Tỉnh", PROV_LIST, key="sug_prov")
     with sug_c3:
-        st.markdown("&nbsp;")
+        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
         sug_btn = st.button("💡 Gợi Ý", key="sug_btn", type="primary", use_container_width=True)
 
     st.caption(
@@ -724,7 +731,7 @@ with tab_cycle:
     with cy_c2:
         cyc_prov = st.selectbox("Tỉnh", PROV_LIST, key="cyc_prov")
     with cy_c3:
-        st.markdown("&nbsp;")
+        st.markdown('<div style="padding-top:1.87rem"></div>', unsafe_allow_html=True)
         cyc_btn = st.button("🔄 Phân Tích", key="cyc_btn", type="primary", use_container_width=True)
 
     if cyc_btn:
