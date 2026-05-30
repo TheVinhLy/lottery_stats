@@ -311,18 +311,18 @@ with tab_update:
                 progress.progress(pct, text=f"[{idx}/{total}] {dstr}")
 
                 api_data = fetch_api_by_date(cur_date)
-                    if api_data:
-                        records = parse_api_response(api_data, cur_date)
-                        day_saved = 0
-                        for rec in records:
-                            if filter_prov and rec.get("province") != filter_prov:
-                                continue
-                            if db.save_result(rec):
-                                saved += 1
-                                day_saved += 1
-                            else:
-                                skipped += 1
-                        write_log(f"[{idx}/{total}] {dstr} → lưu {day_saved} tỉnh", "ok")
+                if api_data:
+                    records = parse_api_response(api_data, cur_date)
+                    day_saved = 0
+                    for rec in records:
+                        if filter_prov and rec.get("province") != filter_prov:
+                            continue
+                        if db.save_result(rec):
+                            saved += 1
+                            day_saved += 1
+                        else:
+                            skipped += 1
+                    write_log(f"[{idx}/{total}] {dstr} → lưu {day_saved} tỉnh", "ok")
                 else:
                     write_log(f"[{idx}/{total}] Không có dữ liệu: {dstr}", "warn")
 
