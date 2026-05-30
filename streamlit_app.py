@@ -212,11 +212,12 @@ st.markdown("""
 
     /* ── Date picker popup / calendar ── */
     [data-baseweb="calendar"] {
-        background-color: #232840 !important;
-        border: 1px solid #4338CA !important;
+        background-color: #1B1F2E !important;
+        border: 2px solid #4338CA !important;
         border-radius: 10px !important;
     }
     [data-baseweb="calendar"] * {
+        background-color: #1B1F2E !important;
         color: #F1F5F9 !important;
     }
     /* Header tháng/năm */
@@ -227,32 +228,37 @@ st.markdown("""
         font-size: 1.0rem !important;
     }
     /* Ngày bình thường */
-    [data-baseweb="calendar"] [aria-label]:not([disabled]) {
+    [data-baseweb="calendar"] [role="gridcell"] > div,
+    [data-baseweb="calendar"] [role="button"] {
         background-color: transparent !important;
         color: #F1F5F9 !important;
         font-size: 1.0rem !important;
     }
     /* Hover ngày */
-    [data-baseweb="calendar"] [aria-label]:hover {
+    [data-baseweb="calendar"] [role="button"]:hover {
         background-color: #3D4A7A !important;
         color: #FFFFFF !important;
         border-radius: 50% !important;
     }
     /* Ngày đang chọn */
-    [data-baseweb="calendar"] [aria-selected="true"] {
+    [data-baseweb="calendar"] [aria-selected="true"] > div,
+    [data-baseweb="calendar"] [data-selected="true"] > div {
         background-color: #4338CA !important;
         color: #FFFFFF !important;
         border-radius: 50% !important;
     }
     /* Ngày hôm nay */
-    [data-baseweb="calendar"] [data-today="true"] {
+    [data-baseweb="calendar"] [data-today="true"] > div {
         border: 2px solid #818CF8 !important;
         border-radius: 50% !important;
+        background-color: #2C3252 !important;
     }
-    /* Tên thứ (Mon, Tue...) */
-    [data-baseweb="calendar"] [data-baseweb="day-label"] {
+    /* Tên thứ */
+    [data-baseweb="calendar"] [data-baseweb="day-label"],
+    [data-baseweb="calendar"] [role="columnheader"] {
         color: #818CF8 !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
+        background-color: #1B1F2E !important;
     }
     /* Nút prev/next tháng */
     [data-baseweb="calendar"] button[aria-label*="previous"],
@@ -263,9 +269,13 @@ st.markdown("""
         color: #FFFFFF !important;
         border-radius: 6px !important;
     }
-    /* Popover wrapper của date picker */
-    [data-baseweb="popover"] {
-        background-color: #232840 !important;
+    /* Popover wrapper nền — phải đặt trước calendar để không đè */
+    [data-baseweb="popover"] > div,
+    [data-baseweb="popover"] [data-baseweb="block"] {
+        background-color: #1B1F2E !important;
+        border: 2px solid #4338CA !important;
+        border-radius: 10px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.7) !important;
     }
 
     /* ── Dataframe ── */
