@@ -1,0 +1,16 @@
+name: Keep Workflows Alive
+
+on:
+  schedule:
+    # Chạy ngày 1 mỗi tháng lúc 0:00 UTC
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Keep workflows alive
+        uses: gautamkrishnar/keepalive-workflow@v2
