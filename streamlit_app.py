@@ -479,7 +479,7 @@ with tab_lo2:
             st.plotly_chart(fig, use_container_width=True)
 
             st.caption(f"Tổng {total_cnt:,} lượt xuất hiện | {len(items)} số khác nhau")
-            st.dataframe(_sdf(df_lo2[[“Rank”,“Số”,“Lần XH”,“Tỷ lệ %”]].reset_index(drop=True)),
+            st.dataframe(_sdf(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)),
                          use_container_width=True, height=300)
 
         with col_right:
