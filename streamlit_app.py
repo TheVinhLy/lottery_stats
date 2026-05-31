@@ -906,6 +906,13 @@ with tab_cycle:
                 df_cyc = pd.DataFrame(hist_rows)
                 st.dataframe(_sdf(df_cyc), use_container_width=True, height=440, hide_index=True)
 
+        with col_cy2:
+            st.markdown("### 📊 Nhận xét")
+            if cyc_data["total"] == 0:
+                st.warning(f"Số **{num_shown}** chưa xuất hiện trong DB.")
+            else:
+                avg = cyc_data.get("avg_cycle", 0)
+                if avg <= 7:
                     verdict = "🔥 Số **NÓNG**, xuất hiện rất thường xuyên"
                 elif avg <= 15:
                     verdict = "✅ Số **BÌNH THƯỜNG**, chu kỳ ổn định"
