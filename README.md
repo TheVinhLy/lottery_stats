@@ -2,7 +2,7 @@
 
 Ứng dụng thống kê xổ số miền Nam — web app Streamlit chạy online, dữ liệu tự động cập nhật hàng ngày qua GitHub Actions, lưu trữ trên Supabase (PostgreSQL).
 
-**Demo trực tiếp:** https://lotterystats.streamlit.app *(thay bằng URL Streamlit Cloud của bạn)*
+**Demo trực tiếp:** https://thongkexs.streamlit.app
 
 ---
 
@@ -30,7 +30,7 @@
                          │  HTTPS
 ┌────────────────────────▼────────────────────────────────┐
 │              Streamlit Cloud (streamlit_app.py)          │
-│   - Hiển thị 10 tab thống kê                            │
+│   - Hiển thị 12 tab thống kê                            │
 │   - Kết nối Supabase để đọc dữ liệu                    │
 └────────────────────────┬────────────────────────────────┘
                          │  DATABASE_URL (PostgreSQL)
@@ -41,7 +41,7 @@
                          │  INSERT hàng ngày
 ┌────────────────────────┴────────────────────────────────┐
 │          GitHub Actions (.github/workflows/)             │
-│   - Chạy 18:30 giờ VN mỗi ngày (11:30 UTC)            │
+│   - Chạy 16:00 & 16:30 giờ VN mỗi ngày                │
 │   - Gọi crawl_daily.py → fetch JSON API → lưu DB       │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -55,7 +55,7 @@
 
 ```
 lottery_stats/
-├── streamlit_app.py         ← Web app chính (Streamlit, 10 tab)
+├── streamlit_app.py         ← Web app chính (Streamlit, 12 tab)
 ├── crawl_daily.py           ← Script crawl cho GitHub Actions
 ├── main.py                  ← Entry point desktop (Tkinter, tùy chọn)
 ├── requirements.txt         ← Thư viện Python
@@ -63,7 +63,8 @@ lottery_stats/
 │
 ├── .github/
 │   └── workflows/
-│       └── daily_crawl.yml  ← GitHub Actions: crawl tự động hàng ngày
+│       ├── daily_crawl.yml  ← Crawl lúc 16:00 giờ VN (09:00 UTC)
+│       └── crawl_daily.yml  ← Crawl lúc 16:30 giờ VN (09:30 UTC)
 │
 ├── crawler/
 │   ├── fetch.py             ← Gọi JSON API / Selenium dự phòng
@@ -151,7 +152,9 @@ CREATE INDEX IF NOT EXISTS idx_date_province ON draw_results(draw_date, province
    - **Value**: URI Transaction Pooler đã copy ở Bước 1
    - Nhấn **Add secret**
 
-3. Kiểm tra file `.github/workflows/daily_crawl.yml` đã có trong repo (tự động chạy lúc 18:30 VN mỗi ngày).
+3. Kiểm tra 2 file workflow đã có trong repo:
+   - `daily_crawl.yml` — tự động chạy lúc **16:00 giờ VN** (09:00 UTC)
+   - `crawl_daily.yml` — tự động chạy lúc **16:30 giờ VN** (09:30 UTC)
 
 ---
 
@@ -263,8 +266,9 @@ python crawl_daily.py --mock
 File cấu hình: `.github/workflows/daily_crawl.yml`
 
 ### Lịch chạy
-- **Tự động**: 18:30 giờ Việt Nam mỗi ngày (11:30 UTC)
-- **Thủ công**: Vào **Actions** → **Daily Lottery Crawl** → **Run workflow**
+- **daily_crawl.yml**: 16:00 giờ Việt Nam mỗi ngày (09:00 UTC)
+- **crawl_daily.yml**: 16:30 giờ Việt Nam mỗi ngày (09:30 UTC)
+- **Thủ công**: Vào **Actions** → chọn workflow → **Run workflow**
 
 ### Tham số khi chạy thủ công
 
@@ -290,45 +294,56 @@ print('Kết nối OK')
 
 ## 📖 Hướng Dẫn Sử Dụng App
 
-### Tab 1 — 📥 Cập Nhật
-1. Chọn **Từ ngày** và **Đến ngày**
-2. Chọn **Tỉnh/Thành** (hoặc "Tất cả")
-3. Tích **Chế độ Demo** nếu muốn test không cần internet
-4. Nhấn **▶ CẬP NHẬT DỮ LIỆU** — nhấn **⏹ DỪNG** để dừng giữa chừng
+App có **12 tab**, tab mặc định khi mở là **Kết Quả**.
 
-### Tab 2 — 📋 Kết Quả
+### Tab 1 — 📋 Kết Quả
 - Lọc theo khoảng ngày + tỉnh → nhấn **🔍 Xem**
 - Xuất báo cáo: nhấn **📥 Xuất Excel**
 
-### Tab 3 — 🎯 Lô 2 Số
-- Tần suất 100 số lô tô (00–99)
-- Biểu đồ nhiệt màu hot/cold
-- **Lô Gan**: top số lâu không về (`Đang Gan` / `Siêu Gan` / `Tuyệt Chủng`)
+### Tab 2 — 🎯 Lô 2 Số
+- Metrics tóm tắt: tổng lượt XH, số nóng/lạnh/gan nhất
+- **3 cột**: Top 20 Nóng | Top 20 Lạnh | Lô Gan 20 số
+- Expander: bảng đầy đủ 100 số kèm tỷ lệ %
 
-### Tab 4 — 🎲 Lô 3 Số
-- Tần suất 3 chữ số cuối, top nhiều & lô gan 3 số
+### Tab 3 — 🎲 Lô 3 Số
+- Top 30 hay gặp + Lô Gan 3 số
+- Expander: top 200 số 3 chữ số
 
-### Tab 5 — 4️⃣ Lô 4 Số
-- Tần suất 4 số cuối (giải 5, 6)
+### Tab 4 — 4️⃣ Lô 4 Số
+- Top 30 hay gặp & Top 30 ít gặp (giải 5, 6)
 
-### Tab 6 — 5️⃣ Lô 5 Số
-- Tần suất 5 số cuối (giải 1–4)
+### Tab 5 — 5️⃣ Lô 5 Số
+- Top 30 hay gặp & Top 30 ít gặp (giải 1–4)
 
-### Tab 7 — 🏆 Giải Đặc Biệt
-- Thống kê 2 số cuối, 3 số cuối, chữ số đầu
-- Lịch sử toàn bộ giải Đặc Biệt
+### Tab 6 — 🏆 Giải Đặc Biệt
+- 2 số cuối, 3 số cuối, chữ số đầu
+- **Tổng 2 chữ số** (0–18): tần suất tổng đầu+đuôi của 2 số cuối ĐB
+- Lịch sử giải ĐB kèm cột Tổng
 
-### Tab 8 — 💡 Gợi Ý Số
-- **Hot**: top số xuất hiện nhiều nhất
-- **Cold / Gan**: top số lâu chưa về
-- **Cầu**: số xuất hiện ≥ 3 kỳ liên tiếp trong 7 ngày gần nhất
-- **Theo ĐB**: 2 số cuối giải ĐB các kỳ gần nhất
+### Tab 7 — 💡 Gợi Ý Số
+- **Điểm tổng hợp** (top 20): gom tín hiệu Cầu+Hot+Chu kỳ+Theo ĐB thành 1 bảng xếp hạng
+- Hot / Lạnh / Cầu / Theo ĐB (4 cột riêng lẻ)
+- **Nhóm Tổng** (90 ngày): tần suất theo tổng 2 chữ số (0–18)
 
-### Tab 9 — 🔄 Chu Kỳ
+### Tab 8 — 🔗 Cặp Số
+- Top 50 cặp số hay xuất hiện cùng ngày
+- Tra cứu số đồng hành: nhập 1 số → xem những số hay đi kèm
+
+### Tab 9 — 📅 Theo Thứ
+- Top 10 số hay về theo từng thứ T2–CN
+- Pivot table: tất cả số × 7 thứ
+
+### Tab 10 — 🔄 Chu Kỳ
 - Phân tích chu kỳ lặp lại trung bình của từng số
+- Nhận xét: Nóng / Bình thường / Ít gặp / Hiếm
 
-### Tab 10 — 📐 Đầu Đuôi
+### Tab 11 — 📐 Đầu Đuôi
 - Tần suất chữ số đầu (0–9) và chữ số đuôi (0–9)
+- Ma trận Đầu × Đuôi
+
+### Tab 12 — 📥 Cập Nhật
+1. Chọn **Từ ngày**, **Đến ngày**, **Tỉnh/Thành**
+2. Nhấn **▶ CẬP NHẬT DỮ LIỆU**
 
 ---
 
@@ -410,7 +425,6 @@ rm data/lottery.db         # macOS/Linux
 | Thư viện | Mục đích |
 |----------|----------|
 | `streamlit` ≥1.35 | Web app framework |
-| `plotly` ≥5.18 | Biểu đồ tương tác |
 | `pandas` ≥2.0 | Xử lý & hiển thị dữ liệu |
 | `requests` ≥2.28 | Gọi JSON API |
 | `beautifulsoup4` + `lxml` | Parse HTML dự phòng |
@@ -431,4 +445,4 @@ rm data/lottery.db         # macOS/Linux
 
 ---
 
-*Cập nhật: tháng 5/2026*
+*Cập nhật: tháng 5/2026 — v2.0 (12 tab, crawl 16h/16h30 VN)*
