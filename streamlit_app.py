@@ -605,7 +605,9 @@ with tab_lo2:
         with st.spinner("Đang tính tần suất..."):
             freq = db.get_number_frequency(
                 lo2_from.strftime("%Y-%m-%d"), lo2_to.strftime("%Y-%m-%d"), lo2_prov)
+            gan_lo2 = db.get_gan_numbers(lo2_to.strftime("%Y-%m-%d"), lo2_prov, top_n=20)
         st.session_state["lo2_freq"] = freq
+        st.session_state["lo2_gan"]  = gan_lo2
 
     freq = st.session_state.get("lo2_freq")
     if freq is None:
@@ -617,35 +619,61 @@ with tab_lo2:
         df_lo2["Tỷ lệ %"] = (df_lo2["Lần XH"] / total_cnt * 100).round(2)
         df_lo2["Rank"] = range(1, len(df_lo2) + 1)
 
-        col_chart, col_right = st.columns([3, 1])
-        with col_chart:
-            st.caption(f"Tổng {total_cnt:,} lượt xuất hiện | {len(items)} số khác nhau")
-            st.dataframe(_sdf(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)),
-                         use_container_width=True, height=300)
+        # ── Metrics ──────────────────────────────────────────────────────
+        m1, m2, m3, m4 = st.columns(4)
+        hot_num, hot_cnt = items[0] if items else ("—", 0)
+        cold_num = df_lo2.iloc[-1]["Số"] if len(df_lo2) > 0 else "—"
+        gan_lo2  = st.session_state.get("lo2_gan", [])
+        gan_top  = gan_lo2[0] if gan_lo2 else {}
+        m1.metric("Tổng lượt XH",   f"{total_cnt:,}")
+        m2.metric("🔥 Nóng nhất",   f"{hot_num}  ({hot_cnt} lần)")
+        m3.metric("❄️ Lạnh nhất",   str(cold_num))
+        m4.metric("⏳ Gan dài nhất", f"{gan_top.get('number','—')}  ({gan_top.get('days_absent','—')} kỳ)")
 
-        with col_right:
-            st.markdown("### 🔥 Top 10 Nóng nhất")
-            hot_df = df_lo2.head(10)[["Số","Lần XH"]]
-            st.dataframe(_sdf(hot_df), use_container_width=True, hide_index=True)
+        st.divider()
 
-            st.markdown("### ❄️ Top 10 Lạnh nhất")
-            # Đưa các số chưa xuất hiện lên đầu
+        # ── 3 cột chính ──────────────────────────────────────────────────
+        col_hot, col_cold, col_gan = st.columns(3)
+
+        with col_hot:
+            st.markdown("### 🔥 Top 20 Nóng nhất")
+            st.caption("Xuất hiện nhiều nhất trong kỳ")
+            hot_df = df_lo2.head(20)[["Rank","Số","Lần XH","Tỷ lệ %"]]
+            st.dataframe(_sdf(hot_df.reset_index(drop=True)),
+                         use_container_width=True, hide_index=True, height=560)
+
+        with col_cold:
+            st.markdown("### ❄️ Top 20 Lạnh nhất")
+            st.caption("Xuất hiện ít nhất (hoặc chưa xuất hiện)")
             seen_set = set(df_lo2["Số"])
             zero_nums = [f"{i:02d}" for i in range(100) if f"{i:02d}" not in seen_set]
-            cold_rows = [{"Số": n, "Lần XH": 0} for n in zero_nums[:10]]
-            cold_df   = pd.DataFrame(df_lo2.tail(10)[["Số","Lần XH"]].values.tolist(),
-                                     columns=["Số","Lần XH"])
-            if cold_rows:
-                cold_df = pd.DataFrame(cold_rows)
-            st.dataframe(_sdf(cold_df), use_container_width=True, hide_index=True)
+            if zero_nums:
+                zero_df = pd.DataFrame({"Số": zero_nums[:20], "Lần XH": 0,
+                                        "Tỷ lệ %": 0.0, "Rank": "—"})
+                cold_df = zero_df
+            else:
+                cold_df = df_lo2.tail(20)[["Rank","Số","Lần XH","Tỷ lệ %"]].iloc[::-1]
+            st.dataframe(_sdf(cold_df.reset_index(drop=True)),
+                         use_container_width=True, hide_index=True, height=560)
 
-            # Lô Gan
+        with col_gan:
             st.markdown("### ⏳ Lô Gan (lâu không về)")
-            gan = db.get_gan_numbers(lo2_to.strftime("%Y-%m-%d"), lo2_prov, top_n=20)
-            gan_df = pd.DataFrame(gan)[["number","last_date","days_absent"]]
-            gan_df.columns = ["Số","Lần cuối","Kỳ vắng"]
-            gan_df["Kỳ vắng"] = gan_df["Kỳ vắng"].apply(lambda x: "Chưa XH" if x >= 9999 else x)
-            st.dataframe(_sdf(gan_df), use_container_width=True, hide_index=True)
+            st.caption("Số vắng mặt nhiều kỳ nhất")
+            if gan_lo2:
+                gan_df = pd.DataFrame(gan_lo2)[["number","last_date","days_absent"]]
+                gan_df.columns = ["Số","Lần cuối","Kỳ vắng"]
+                gan_df["Kỳ vắng"] = gan_df["Kỳ vắng"].apply(
+                    lambda x: "Chưa XH" if x >= 9999 else x)
+                st.dataframe(_sdf(gan_df), use_container_width=True,
+                             hide_index=True, height=560)
+
+        st.divider()
+
+        # ── Bảng đầy đủ 100 số ───────────────────────────────────────────
+        with st.expander(f"📋 Bảng đầy đủ tất cả {len(df_lo2)} số (sắp xếp theo tần suất)"):
+            st.caption(f"Tổng {total_cnt:,} lượt xuất hiện")
+            st.dataframe(_sdf(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)),
+                         use_container_width=True, height=400)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -668,23 +696,45 @@ with tab_lo3:
         st.info("👆 Nhấn **Phân Tích** để xem thống kê lô 3 số.")
     else:
         items3 = list(freq3.items())
+        total3 = sum(v for _, v in items3)
         df_lo3 = pd.DataFrame(items3, columns=["3 Số","Lần XH"])
+        df_lo3["Tỷ lệ %"] = (df_lo3["Lần XH"] / total3 * 100).round(3) if total3 else 0
 
-        col_l3, col_r3 = st.columns([3, 1])
+        # ── Metrics ──────────────────────────────────────────────────────
+        m1, m2, m3 = st.columns(3)
+        hot3 = items3[0] if items3 else ("—", 0)
+        m1.metric("Tổng lượt XH", f"{total3:,}")
+        m2.metric("🔥 Nóng nhất", f"{hot3[0]}  ({hot3[1]} lần)")
+        m3.metric("Số 3 chữ số khác nhau", f"{len(items3):,}")
+
+        st.divider()
+
+        # ── 2 cột chính ──────────────────────────────────────────────────
+        col_l3, col_r3 = st.columns(2)
+
         with col_l3:
-            st.dataframe(_sdf(df_lo3.head(100)), use_container_width=True, height=280, hide_index=True)
+            st.markdown("### 🔥 Top 30 Hay Gặp Nhất")
+            df_top30 = df_lo3.head(30).reset_index(drop=True)
+            df_top30.index = range(1, len(df_top30)+1)
+            st.dataframe(_sdf(df_top30), use_container_width=True, height=700)
 
         with col_r3:
-            st.markdown("### 🔥 Top 15 hay gặp")
-            st.dataframe(_sdf(df_lo3.head(15)), use_container_width=True, hide_index=True)
-
-            st.markdown("### ⏳ Lô Gan 3 số")
+            st.markdown("### ⏳ Lô Gan 3 Số")
+            st.caption("Số 3 chữ số lâu không về nhất")
             gan3 = st.session_state.get("lo3_gan", [])
             if gan3:
                 df_g3 = pd.DataFrame(gan3)[["number","last_date","days_absent"]]
                 df_g3.columns = ["3 Số","Lần cuối","Kỳ vắng"]
-                df_g3["Kỳ vắng"] = df_g3["Kỳ vắng"].apply(lambda x: "Chưa XH" if x >= 9999 else x)
-                st.dataframe(_sdf(df_g3), use_container_width=True, hide_index=True)
+                df_g3["Kỳ vắng"] = df_g3["Kỳ vắng"].apply(
+                    lambda x: "Chưa XH" if x >= 9999 else x)
+                st.dataframe(_sdf(df_g3), use_container_width=True,
+                             hide_index=True, height=700)
+
+        st.divider()
+
+        with st.expander(f"📋 Bảng đầy đủ top 200 số 3 chữ số"):
+            st.dataframe(_sdf(df_lo3.head(200).reset_index(drop=True)),
+                         use_container_width=True, height=400, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -706,14 +756,33 @@ with tab_lo4:
         st.info("👆 Nhấn **Phân Tích** để xem thống kê lô 4 số.")
     else:
         items4 = list(freq4.items())
+        total4 = sum(v for _, v in items4)
         df_lo4 = pd.DataFrame(items4, columns=["4 Số","Lần XH"])
 
-        col_l4, col_r4 = st.columns([3, 1])
+        # ── Metrics ──────────────────────────────────────────────────────
+        m1, m2, m3 = st.columns(3)
+        hot4 = items4[0] if items4 else ("—", 0)
+        m1.metric("Tổng lượt XH", f"{total4:,}")
+        m2.metric("🔥 Nóng nhất", f"{hot4[0]}  ({hot4[1]} lần)")
+        m3.metric("Số 4 chữ số khác nhau", f"{len(items4):,}")
+
+        st.divider()
+
+        col_l4, col_r4 = st.columns(2)
         with col_l4:
-            st.dataframe(_sdf(df_lo4.head(100)), use_container_width=True, height=280, hide_index=True)
+            st.markdown("### 🔥 Top 30 Hay Gặp Nhất")
+            df_top30_4 = df_lo4.head(30).reset_index(drop=True)
+            df_top30_4.index = range(1, len(df_top30_4)+1)
+            st.dataframe(_sdf(df_top30_4), use_container_width=True, height=700)
         with col_r4:
-            st.markdown("### 🔥 Top 20 hay gặp")
-            st.dataframe(_sdf(df_lo4.head(20)), use_container_width=True, hide_index=True)
+            st.markdown("### ❄️ Top 30 Ít Gặp Nhất")
+            df_bot30_4 = df_lo4.tail(30).reset_index(drop=True)
+            df_bot30_4.index = range(1, len(df_bot30_4)+1)
+            st.dataframe(_sdf(df_bot30_4), use_container_width=True, height=700)
+
+        with st.expander("📋 Bảng đầy đủ top 200 số 4 chữ số"):
+            st.dataframe(_sdf(df_lo4.head(200).reset_index(drop=True)),
+                         use_container_width=True, height=400, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -735,14 +804,33 @@ with tab_lo5:
         st.info("👆 Nhấn **Phân Tích** để xem thống kê lô 5 số.")
     else:
         items5 = list(freq5.items())
+        total5 = sum(v for _, v in items5)
         df_lo5 = pd.DataFrame(items5, columns=["5 Số","Lần XH"])
 
-        col_l5, col_r5 = st.columns([3, 1])
+        # ── Metrics ──────────────────────────────────────────────────────
+        m1, m2, m3 = st.columns(3)
+        hot5 = items5[0] if items5 else ("—", 0)
+        m1.metric("Tổng lượt XH", f"{total5:,}")
+        m2.metric("🔥 Nóng nhất", f"{hot5[0]}  ({hot5[1]} lần)")
+        m3.metric("Số 5 chữ số khác nhau", f"{len(items5):,}")
+
+        st.divider()
+
+        col_l5, col_r5 = st.columns(2)
         with col_l5:
-            st.dataframe(_sdf(df_lo5.head(100)), use_container_width=True, height=280, hide_index=True)
+            st.markdown("### 🔥 Top 30 Hay Gặp Nhất")
+            df_top30_5 = df_lo5.head(30).reset_index(drop=True)
+            df_top30_5.index = range(1, len(df_top30_5)+1)
+            st.dataframe(_sdf(df_top30_5), use_container_width=True, height=700)
         with col_r5:
-            st.markdown("### 🔥 Top 20 hay gặp")
-            st.dataframe(_sdf(df_lo5.head(20)), use_container_width=True, hide_index=True)
+            st.markdown("### ❄️ Top 30 Ít Gặp Nhất")
+            df_bot30_5 = df_lo5.tail(30).reset_index(drop=True)
+            df_bot30_5.index = range(1, len(df_bot30_5)+1)
+            st.dataframe(_sdf(df_bot30_5), use_container_width=True, height=700)
+
+        with st.expander("📋 Bảng đầy đủ top 200 số 5 chữ số"):
+            st.dataframe(_sdf(df_lo5.head(200).reset_index(drop=True)),
+                         use_container_width=True, height=400, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
