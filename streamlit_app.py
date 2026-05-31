@@ -776,13 +776,14 @@ with tab_special:
             st.markdown("### ➕ Tổng 2 Chữ Số Cuối ĐB")
             st.caption("Tổng đầu + đuôi của 2 số cuối giải ĐB (0–18)")
             sp_sums = st.session_state.get("sp_sums", {})
-            df_sums = pd.DataFrame([
-                {"Tổng": int(k), "Lần XH": v,
-                 "Các số cùng tổng": ", ".join(f"{a}{b}" for a in range(10) for b in range(10) if a+b==int(k))}
-                for k, v in sp_sums.items()
-            ]).sort_values("Lần XH", ascending=False)
-            st.dataframe(_sdf(df_sums.reset_index(drop=True)), use_container_width=True,
-                         height=280, hide_index=True)
+            if sp_sums:
+                df_sums = pd.DataFrame([
+                    {"Tổng": int(k), "Lần XH": v,
+                     "Các số cùng tổng": ", ".join(f"{a}{b}" for a in range(10) for b in range(10) if a+b==int(k))}
+                    for k, v in sp_sums.items()
+                ]).sort_values("Lần XH", ascending=False)
+                st.dataframe(_sdf(df_sums.reset_index(drop=True)), use_container_width=True,
+                             height=280, hide_index=True)
 
         with col_b:
             st.markdown("### 🏅 3 Số Cuối Giải ĐB")
