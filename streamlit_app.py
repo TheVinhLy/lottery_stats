@@ -714,6 +714,7 @@ with tab_lo3:
 
         with col_l3:
             st.markdown("### 🔥 Top 30 Hay Gặp Nhất")
+            st.caption("Xuất hiện nhiều nhất trong kỳ")
             df_top30 = df_lo3.head(30).reset_index(drop=True)
             df_top30.index = range(1, len(df_top30)+1)
             st.dataframe(_sdf(df_top30), use_container_width=True, height=700)
