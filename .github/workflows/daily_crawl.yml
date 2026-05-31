@@ -1,9 +1,9 @@
 name: Daily Lottery Crawl
 
 on:
-  # Chạy tự động mỗi ngày lúc 17:05 giờ Việt Nam (10:05 UTC)
+  # Chạy tự động mỗi ngày lúc 16:00 giờ Việt Nam (09:00 UTC)
   schedule:
-    - cron: "5 10 * * *"
+    - cron: "0 9 * * *"
 
   # Cho phép chạy thủ công từ GitHub Actions UI
   workflow_dispatch:

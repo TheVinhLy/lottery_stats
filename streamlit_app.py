@@ -416,12 +416,12 @@ st.markdown('<div style="margin-top:0.3rem"></div>', unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════
 
 tabs = st.tabs([
-    "📥 Cập Nhật", "📋 Kết Quả", "🎯 Lô 2 Số", "🎲 Lô 3 Số",
+    "� Kết Quả", "🎯 Lô 2 Số", "🎲 Lô 3 Số",
     "4️⃣ Lô 4 Số", "5️⃣ Lô 5 Số", "🏆 Giải ĐB",
-    "💡 Gợi Ý Số", "🔄 Chu Kỳ", "📐 Đầu Đuôi",
+    "💡 Gợi Ý Số", "🔄 Chu Kỳ", "📐 Đầu Đuôi", "📥 Cập Nhật",
 ])
-(tab_update, tab_results, tab_lo2, tab_lo3, tab_lo4,
- tab_lo5, tab_special, tab_suggest, tab_cycle, tab_headtail) = tabs
+(tab_results, tab_lo2, tab_lo3, tab_lo4,
+ tab_lo5, tab_special, tab_suggest, tab_cycle, tab_headtail, tab_update) = tabs
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -617,18 +617,6 @@ with tab_lo2:
 
         col_chart, col_right = st.columns([3, 1])
         with col_chart:
-            # Biểu đồ sắp xếp theo số 00-99
-            df_plot = df_lo2.sort_values("Số")
-            # Thêm các số 0 lần nếu thiếu
-            all_nums = {f"{i:02d}" for i in range(100)}
-            missing  = all_nums - set(df_plot["Số"])
-            if missing:
-                miss_df  = pd.DataFrame({"Số": sorted(missing), "Lần XH": 0, "Tỷ lệ %": 0.0, "Rank": 0})
-                df_plot  = pd.concat([df_plot, miss_df]).sort_values("Số").reset_index(drop=True)
-
-            fig = _bar_chart(df_plot, "Số", "Lần XH", "Tần suất lô 2 số (00–99)")
-            st.plotly_chart(fig, use_container_width=True)
-
             st.caption(f"Tổng {total_cnt:,} lượt xuất hiện | {len(items)} số khác nhau")
             st.dataframe(_sdf(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)),
                          use_container_width=True, height=300)
@@ -682,9 +670,6 @@ with tab_lo3:
 
         col_l3, col_r3 = st.columns([3, 1])
         with col_l3:
-            df_top100 = df_lo3.head(100)
-            fig3 = _bar_chart(df_top100, "3 Số", "Lần XH", "Top 100 tần suất 3 số cuối")
-            st.plotly_chart(fig3, use_container_width=True)
             st.dataframe(_sdf(df_lo3.head(100)), use_container_width=True, height=280, hide_index=True)
 
         with col_r3:
@@ -723,8 +708,6 @@ with tab_lo4:
 
         col_l4, col_r4 = st.columns([3, 1])
         with col_l4:
-            fig4 = _bar_chart(df_lo4.head(60), "4 Số", "Lần XH", "Top 60 tần suất 4 số")
-            st.plotly_chart(fig4, use_container_width=True)
             st.dataframe(_sdf(df_lo4.head(100)), use_container_width=True, height=280, hide_index=True)
         with col_r4:
             st.markdown("### 🔥 Top 20 hay gặp")
@@ -754,8 +737,6 @@ with tab_lo5:
 
         col_l5, col_r5 = st.columns([3, 1])
         with col_l5:
-            fig5 = _bar_chart(df_lo5.head(60), "5 Số", "Lần XH", "Top 60 tần suất 5 số")
-            st.plotly_chart(fig5, use_container_width=True)
             st.dataframe(_sdf(df_lo5.head(100)), use_container_width=True, height=280, hide_index=True)
         with col_r5:
             st.markdown("### 🔥 Top 20 hay gặp")
@@ -785,16 +766,12 @@ with tab_special:
             st.markdown("### 🏅 2 Số Cuối Giải ĐB")
             df_l2 = pd.DataFrame(list(sp_data["last2"].items())[:50],
                                  columns=["2 Cuối","Lần XH"])
-            fig_l2 = _bar_chart(df_l2, "2 Cuối", "Lần XH", "2 số cuối ĐB", "Purp")
-            st.plotly_chart(fig_l2, use_container_width=True)
             st.dataframe(_sdf(df_l2), use_container_width=True, height=250, hide_index=True)
 
         with col_b:
             st.markdown("### 🏅 3 Số Cuối Giải ĐB")
             df_l3 = pd.DataFrame(list(sp_data["last3"].items())[:50],
                                  columns=["3 Cuối","Lần XH"])
-            fig_l3 = _bar_chart(df_l3, "3 Cuối", "Lần XH", "3 số cuối ĐB", "Teal")
-            st.plotly_chart(fig_l3, use_container_width=True)
             st.dataframe(_sdf(df_l3), use_container_width=True, height=250, hide_index=True)
 
         with col_c:
@@ -929,30 +906,6 @@ with tab_cycle:
                 df_cyc = pd.DataFrame(hist_rows)
                 st.dataframe(_sdf(df_cyc), use_container_width=True, height=440, hide_index=True)
 
-                # Timeline chart
-                if cycles:
-                    fig_cy = go.Figure()
-                    fig_cy.add_trace(go.Scatter(
-                        x=list(range(1, len(cycles)+1)), y=cycles,
-                        mode="lines+markers",
-                        line=dict(color="#818CF8", width=2),
-                        marker=dict(size=6),
-                        name="Khoảng cách (ngày)"))
-                    avg = cyc_data.get("avg_cycle", 0)
-                    fig_cy.add_hline(y=avg, line_dash="dash", line_color="#FBBF24",
-                                     annotation_text=f"TB: {avg} ngày")
-                    fig_cy.update_layout(
-                        title=f"Chu kỳ xuất hiện số {num_shown}",
-                        **_chart_layout())
-                    st.plotly_chart(fig_cy, use_container_width=True)
-
-        with col_cy2:
-            st.markdown("### 📊 Nhận xét")
-            if cyc_data["total"] == 0:
-                st.warning(f"Số **{num_shown}** chưa xuất hiện trong DB.")
-            else:
-                avg = cyc_data.get("avg_cycle", 0)
-                if avg <= 7:
                     verdict = "🔥 Số **NÓNG**, xuất hiện rất thường xuyên"
                 elif avg <= 15:
                     verdict = "✅ Số **BÌNH THƯỜNG**, chu kỳ ổn định"
@@ -1004,11 +957,6 @@ with tab_headtail:
             df_head = pd.DataFrame([
                 {"Đầu": f"Đầu {i}", "Lần XH": head[str(i)]} for i in range(10)
             ])
-            fig_head = px.bar(df_head, x="Đầu", y="Lần XH",
-                              color="Lần XH", color_continuous_scale="Blues",
-                              template="plotly_dark", title="Phân bố đầu số")
-            fig_head.update_layout(**_chart_layout())
-            st.plotly_chart(fig_head, use_container_width=True)
             st.dataframe(_sdf(df_head), use_container_width=True, hide_index=True)
 
         with col_t:
@@ -1016,11 +964,6 @@ with tab_headtail:
             df_tail = pd.DataFrame([
                 {"Đuôi": f"Đuôi {i}", "Lần XH": tail[str(i)]} for i in range(10)
             ])
-            fig_tail = px.bar(df_tail, x="Đuôi", y="Lần XH",
-                              color="Lần XH", color_continuous_scale="Teal",
-                              template="plotly_dark", title="Phân bố đuôi số")
-            fig_tail.update_layout(**_chart_layout())
-            st.plotly_chart(fig_tail, use_container_width=True)
             st.dataframe(_sdf(df_tail), use_container_width=True, hide_index=True)
 
         with col_m:
@@ -1040,12 +983,4 @@ with tab_headtail:
                                   index=[f"Đầu {h}" for h in range(10)],
                                   columns=[f"Đuôi {t}" for t in range(10)])
 
-            fig_mat = px.imshow(df_mat,
-                                labels=dict(x="Đuôi số", y="Đầu số", color="Lần XH"),
-                                color_continuous_scale="Blues",
-                                title="Ma trận Đầu × Đuôi (lần xuất hiện)",
-                                template="plotly_dark",
-                                aspect="auto")
-            fig_mat.update_layout(**_chart_layout(coloraxis_showscale=True))
-            st.plotly_chart(fig_mat, use_container_width=True)
             st.dataframe(df_mat, use_container_width=True)

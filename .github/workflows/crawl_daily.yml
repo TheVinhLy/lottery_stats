@@ -2,8 +2,8 @@ name: Crawl xổ số hàng ngày
 
 on:
   schedule:
-    # Chạy 20:05 giờ Việt Nam (13:05 UTC)
-    - cron: "5 13 * * *"
+    # Chạy 16:30 giờ Việt Nam (09:30 UTC)
+    - cron: "30 9 * * *"
   workflow_dispatch:
     inputs:
       date:
