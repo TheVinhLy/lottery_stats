@@ -418,10 +418,12 @@ st.markdown('<div style="margin-top:0.3rem"></div>', unsafe_allow_html=True)
 tabs = st.tabs([
     "� Kết Quả", "🎯 Lô 2 Số", "🎲 Lô 3 Số",
     "4️⃣ Lô 4 Số", "5️⃣ Lô 5 Số", "🏆 Giải ĐB",
-    "💡 Gợi Ý Số", "🔄 Chu Kỳ", "📐 Đầu Đuôi", "📥 Cập Nhật",
+    "💡 Gợi Ý Số", "🔗 Cặp Số", "📅 Theo Thứ",
+    "🔄 Chu Kỳ", "📐 Đầu Đuôi", "📥 Cập Nhật",
 ])
 (tab_results, tab_lo2, tab_lo3, tab_lo4,
- tab_lo5, tab_special, tab_suggest, tab_cycle, tab_headtail, tab_update) = tabs
+ tab_lo5, tab_special, tab_suggest, tab_pair, tab_dow,
+ tab_cycle, tab_headtail, tab_update) = tabs
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -754,7 +756,10 @@ with tab_special:
         with st.spinner("Đang tải thống kê giải ĐB..."):
             sp_data = db.get_special_prize_stats(
                 sp_from.strftime("%Y-%m-%d"), sp_to.strftime("%Y-%m-%d"), sp_prov)
+            sp_sums = db.get_special_sum_stats(
+                sp_from.strftime("%Y-%m-%d"), sp_to.strftime("%Y-%m-%d"), sp_prov)
         st.session_state["sp_data"] = sp_data
+        st.session_state["sp_sums"] = sp_sums
 
     sp_data = st.session_state.get("sp_data")
     if sp_data is None:
@@ -768,11 +773,28 @@ with tab_special:
                                  columns=["2 Cuối","Lần XH"])
             st.dataframe(_sdf(df_l2), use_container_width=True, height=250, hide_index=True)
 
+            st.markdown("### ➕ Tổng 2 Chữ Số Cuối ĐB")
+            st.caption("Tổng đầu + đuôi của 2 số cuối giải ĐB (0–18)")
+            sp_sums = st.session_state.get("sp_sums", {})
+            df_sums = pd.DataFrame([
+                {"Tổng": int(k), "Lần XH": v,
+                 "Các số cùng tổng": ", ".join(f"{a}{b}" for a in range(10) for b in range(10) if a+b==int(k))}
+                for k, v in sp_sums.items()
+            ]).sort_values("Lần XH", ascending=False)
+            st.dataframe(_sdf(df_sums.reset_index(drop=True)), use_container_width=True,
+                         height=280, hide_index=True)
+
         with col_b:
             st.markdown("### 🏅 3 Số Cuối Giải ĐB")
             df_l3 = pd.DataFrame(list(sp_data["last3"].items())[:50],
                                  columns=["3 Cuối","Lần XH"])
             st.dataframe(_sdf(df_l3), use_container_width=True, height=250, hide_index=True)
+
+            st.markdown("### 🔢 Chữ Số Đầu Giải ĐB")
+            first1 = sp_data.get("first1", {})
+            if first1:
+                df_f1 = pd.DataFrame(list(first1.items()), columns=["Đầu","Lần XH"])
+                st.dataframe(_sdf(df_f1), use_container_width=True, height=280, hide_index=True)
 
         with col_c:
             st.markdown("### 📜 Lịch sử Giải Đặc Biệt")
@@ -781,9 +803,11 @@ with tab_special:
                 df_hist = pd.DataFrame(hist)
                 df_hist["2 Cuối"] = df_hist["number"].str[-2:]
                 df_hist["3 Cuối"] = df_hist["number"].str[-3:]
-                df_hist = df_hist[["date","province","number","2 Cuối","3 Cuối"]]
-                df_hist.columns = ["Ngày","Tỉnh","Giải ĐB","2 Cuối","3 Cuối"]
-                st.dataframe(_sdf(df_hist), use_container_width=True, height=560, hide_index=True)
+                df_hist["Tổng"] = df_hist["2 Cuối"].apply(
+                    lambda x: int(x[0])+int(x[1]) if x.isdigit() else "")
+                df_hist = df_hist[["date","province","number","2 Cuối","3 Cuối","Tổng"]]
+                df_hist.columns = ["Ngày","Tỉnh","Giải ĐB","2 Cuối","3 Cuối","Tổng"]
+                st.dataframe(_sdf(df_hist), use_container_width=True, height=620, hide_index=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -809,13 +833,37 @@ with tab_suggest:
 
     if sug_btn:
         with st.spinner("Đang tính gợi ý..."):
-            sug_data = db.get_suggestions(sug_date.strftime("%Y-%m-%d"), sug_prov)
-        st.session_state["sug_data"] = sug_data
+            sug_data  = db.get_suggestions(sug_date.strftime("%Y-%m-%d"), sug_prov)
+            sug_score = db.get_scored_suggestions(sug_date.strftime("%Y-%m-%d"), sug_prov)
+            sug_sums  = db.get_sum_groups(
+                (sug_date - timedelta(days=90)).strftime("%Y-%m-%d"),
+                sug_date.strftime("%Y-%m-%d"), sug_prov)
+        st.session_state["sug_data"]  = sug_data
+        st.session_state["sug_score"] = sug_score
+        st.session_state["sug_sums"]  = sug_sums
 
     sug_data = st.session_state.get("sug_data")
     if sug_data is None:
         st.info("👆 Nhấn **Gợi Ý** để xem đề xuất số.")
     else:
+        # ── Hàng 1: Điểm tổng hợp + các tín hiệu cơ bản ─────────────────
+        st.markdown("### 🏅 Điểm Tổng Hợp (Top 20)")
+        st.caption(
+            "**Cách tính điểm:** Cầu ≥3 kỳ/7 ngày **+3** | Hot top10/30 ngày **+2** | "
+            "Theo ĐB gần nhất **+1** | Gan quá dài **-1**"
+        )
+        sug_score = st.session_state.get("sug_score", [])
+        if sug_score:
+            df_score = pd.DataFrame(sug_score)
+            df_score.index = range(1, len(df_score)+1)
+            df_score.columns = ["Số","Điểm","Chi tiết"]
+            st.dataframe(_sdf(df_score), use_container_width=True, height=320)
+        else:
+            st.caption("Chưa đủ dữ liệu để tính điểm.")
+
+        st.divider()
+
+        # ── Hàng 2: 4 tín hiệu riêng lẻ ─────────────────────────────────
         col_s1, col_s2, col_s3, col_s4 = st.columns(4)
 
         with col_s1:
@@ -854,6 +902,117 @@ with tab_suggest:
                 df_tdb = pd.DataFrame(theo_db)[["number","from_special","date"]]
                 df_tdb.columns = ["2 Cuối","Từ ĐB","Ngày"]
                 st.dataframe(_sdf(df_tdb), use_container_width=True, hide_index=True)
+
+        st.divider()
+
+        # ── Hàng 3: Nhóm tổng ────────────────────────────────────────────
+        st.markdown("### ➕ Nhóm Tổng (90 ngày gần nhất)")
+        st.caption(
+            "Tổng 2 chữ số của lô 2 số (tổng 0–18). "
+            "**Ví dụ tổng 7**: 07, 16, 25, 34, 43, 52, 61, 70"
+        )
+        sug_sums = st.session_state.get("sug_sums", [])
+        if sug_sums:
+            df_sg = pd.DataFrame(sug_sums)[["tong","count","so_cung_tong"]]
+            df_sg.columns = ["Tổng","Tần suất","Các số cùng tổng"]
+            st.dataframe(_sdf(df_sg.reset_index(drop=True)), use_container_width=True,
+                         height=300, hide_index=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Tab — Cặp Số
+# ══════════════════════════════════════════════════════════════════════════
+
+with tab_pair:
+    pr_from, pr_to, pr_prov, pr_btn = _filter_row("pair")
+
+    if pr_btn:
+        with st.spinner("Đang tính cặp số..."):
+            pair_data = db.get_pair_frequency(
+                pr_from.strftime("%Y-%m-%d"), pr_to.strftime("%Y-%m-%d"), pr_prov, top_n=50)
+        st.session_state["pair_data"] = pair_data
+
+    pair_data = st.session_state.get("pair_data")
+    if pair_data is None:
+        st.info("👆 Nhấn **Phân Tích** để xem thống kê cặp số đồng hành.")
+    else:
+        col_p1, col_p2 = st.columns([2, 1])
+        with col_p1:
+            st.markdown("### 🔗 Top 50 Cặp Số Hay Đi Cùng Nhau")
+            st.caption("Hai số xuất hiện cùng ngày, cùng tỉnh — càng nhiều lần càng đáng chú ý")
+            df_pair = pd.DataFrame(pair_data)
+            df_pair.index = range(1, len(df_pair)+1)
+            df_pair.columns = ["Số 1","Số 2","Lần cùng nhau"]
+            st.dataframe(_sdf(df_pair), use_container_width=True, height=560)
+
+        with col_p2:
+            st.markdown("### 🔍 Tra số đồng hành")
+            st.caption("Nhập 1 số để xem những số hay đi kèm")
+            lookup_num = st.text_input("Số (2 chữ số)", value="07", max_chars=2, key="pair_lookup")
+            lookup_btn = st.button("Tra cứu", key="pair_lookup_btn", use_container_width=True)
+            if lookup_btn:
+                companion = db.get_companion_numbers(
+                    lookup_num.strip().zfill(2),
+                    pr_from.strftime("%Y-%m-%d"), pr_to.strftime("%Y-%m-%d"), pr_prov)
+                st.session_state["companion_data"] = companion
+                st.session_state["companion_num"] = lookup_num.strip().zfill(2)
+
+            comp = st.session_state.get("companion_data")
+            comp_num = st.session_state.get("companion_num","")
+            if comp:
+                st.markdown(f"**Số hay đi cùng {comp_num}:**")
+                df_comp = pd.DataFrame(comp)
+                df_comp.columns = ["Số kèm","Lần cùng nhau"]
+                st.dataframe(_sdf(df_comp), use_container_width=True, hide_index=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Tab — Theo Thứ
+# ══════════════════════════════════════════════════════════════════════════
+
+with tab_dow:
+    dw_from, dw_to, dw_prov, dw_btn = _filter_row("dow")
+
+    if dw_btn:
+        with st.spinner("Đang tính tần suất theo thứ..."):
+            dow_rows = db.get_dow_top(
+                dw_from.strftime("%Y-%m-%d"), dw_to.strftime("%Y-%m-%d"), dw_prov, top_n=10)
+            dow_freq = db.get_dow_frequency(
+                dw_from.strftime("%Y-%m-%d"), dw_to.strftime("%Y-%m-%d"), dw_prov)
+        st.session_state["dow_rows"] = dow_rows
+        st.session_state["dow_freq"] = dow_freq
+
+    dow_rows = st.session_state.get("dow_rows")
+    if dow_rows is None:
+        st.info("👆 Nhấn **Phân Tích** để xem thống kê theo thứ trong tuần.")
+    else:
+        DOW_ORDER = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"]
+        st.markdown("### 📅 Top 10 Số Hay Về Theo Từng Thứ")
+        st.caption("Dựa trên lịch sử — mỗi cột là 1 thứ trong tuần")
+
+        dow_freq = st.session_state.get("dow_freq", {})
+        cols = st.columns(7)
+        for col_idx, day in enumerate(DOW_ORDER):
+            with cols[col_idx]:
+                st.markdown(f"**{day}**")
+                freq = dow_freq.get(day, {})
+                top10 = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:10]
+                if top10:
+                    df_d = pd.DataFrame(top10, columns=["Số","Lần"])
+                    st.dataframe(_sdf(df_d), use_container_width=True, hide_index=True, height=320)
+                else:
+                    st.caption("Không có dữ liệu")
+
+        st.divider()
+        st.markdown("### 📊 Bảng tổng hợp tất cả số theo thứ")
+        df_all = pd.DataFrame(dow_rows)
+        if not df_all.empty:
+            pivot = df_all.pivot_table(index="Số", columns="Thứ", values="Lần XH",
+                                       aggfunc="sum", fill_value=0)
+            pivot = pivot.reindex(columns=[d for d in DOW_ORDER if d in pivot.columns])
+            pivot["Tổng"] = pivot.sum(axis=1)
+            pivot = pivot.sort_values("Tổng", ascending=False).head(30)
+            st.dataframe(pivot, use_container_width=True, height=500)
 
 
 # ══════════════════════════════════════════════════════════════════════════

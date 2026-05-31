@@ -492,3 +492,180 @@ class Database:
     def get_top_numbers(self, start_date: str, end_date: str, province: str = None, top_n: int = 10) -> List[Dict]:
         freq = self.get_number_frequency(start_date, end_date, province)
         return [{"number": n, "count": c} for n, c in list(freq.items())[:top_n]]
+
+    # ── Cặp số đồng hành ─────────────────────────────────────────────────
+
+    def get_pair_frequency(self, start_date: str, end_date: str, province: str = None, top_n: int = 50) -> List[Dict]:
+        """Các cặp 2 số hay xuất hiện cùng ngày (trên cùng 1 tỉnh)."""
+        results = self.get_results(start_date, end_date, province)
+        # Nhóm theo (ngày, tỉnh)
+        day_nums: Dict[tuple, set] = {}
+        for r in results:
+            key = (r["draw_date"], r["province"])
+            nums = {n.strip()[-2:] for n in r.get("all_numbers","").split(",")
+                    if len(n.strip()) >= 2 and n.strip().isdigit()}
+            day_nums[key] = nums
+
+        pair_count: Dict[tuple, int] = {}
+        for nums in day_nums.values():
+            lst = sorted(nums)
+            for i in range(len(lst)):
+                for j in range(i+1, len(lst)):
+                    pair = (lst[i], lst[j])
+                    pair_count[pair] = pair_count.get(pair, 0) + 1
+
+        top = sorted(pair_count.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        return [{"so1": p[0], "so2": p[1], "count": c} for p, c in top]
+
+    def get_companion_numbers(self, target: str, start_date: str, end_date: str,
+                              province: str = None, top_n: int = 15) -> List[Dict]:
+        """Những số hay xuất hiện cùng ngày với số target."""
+        results = self.get_results(start_date, end_date, province)
+        companion: Dict[str, int] = {}
+        for r in results:
+            nums = {n.strip()[-2:] for n in r.get("all_numbers","").split(",")
+                    if len(n.strip()) >= 2 and n.strip().isdigit()}
+            if target in nums:
+                for n in nums:
+                    if n != target:
+                        companion[n] = companion.get(n, 0) + 1
+        top = sorted(companion.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        return [{"number": n, "count": c} for n, c in top]
+
+    # ── Thống kê theo thứ trong tuần ──────────────────────────────────────
+
+    def get_dow_frequency(self, start_date: str, end_date: str, province: str = None) -> Dict[str, Dict[str, int]]:
+        """
+        Tần suất từng số (00-99) theo thứ trong tuần.
+        Trả về dict: {'Mon': {'07': 5, '22': 3, ...}, 'Tue': {...}, ...}
+        """
+        DOW = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"]
+        results = self.get_results(start_date, end_date, province)
+        dow_freq: Dict[str, Dict[str, int]] = {d: {} for d in DOW}
+        for r in results:
+            try:
+                dt = datetime.strptime(r["draw_date"], "%Y-%m-%d").date()
+            except Exception:
+                continue
+            day_label = DOW[dt.weekday()]
+            for n in self._extract_numbers([r], 2):
+                dow_freq[day_label][n] = dow_freq[day_label].get(n, 0) + 1
+        return dow_freq
+
+    def get_dow_top(self, start_date: str, end_date: str, province: str = None, top_n: int = 10) -> List[Dict]:
+        """Top số theo từng thứ."""
+        dow_freq = self.get_dow_frequency(start_date, end_date, province)
+        rows = []
+        for day, freq in dow_freq.items():
+            top = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:top_n]
+            for rank, (num, cnt) in enumerate(top, 1):
+                rows.append({"Thứ": day, "Rank": rank, "Số": num, "Lần XH": cnt})
+        return rows
+
+    # ── Tổng 2 chữ số giải ĐB ────────────────────────────────────────────
+
+    def get_special_sum_stats(self, start_date: str, end_date: str, province: str = None) -> Dict[str, int]:
+        """
+        Tần suất tổng đầu + đuôi của 2 số cuối giải ĐB (tổng từ 0 đến 18).
+        Ví dụ: ĐB = ...37 → tổng = 3+7 = 10
+        """
+        results = self.get_results(start_date, end_date, province)
+        sums: Dict[str, int] = {str(i): 0 for i in range(19)}
+        for r in results:
+            sp = r.get("special_prize","").strip()
+            if sp and len(sp) >= 2 and sp.isdigit():
+                last2 = sp[-2:]
+                total = int(last2[0]) + int(last2[1])
+                sums[str(total)] = sums.get(str(total), 0) + 1
+        return sums
+
+    # ── Điểm tổng hợp gợi ý ──────────────────────────────────────────────
+
+    def get_scored_suggestions(self, reference_date: str, province: str = None, top_n: int = 20) -> List[Dict]:
+        """
+        Tổng hợp điểm từ nhiều tín hiệu cho từng số 00-99.
+        Điểm:
+          +3 nếu đang cầu (xuất hiện >= 3 lần trong 7 ngày)
+          +2 nếu hot top 10 trong 30 ngày
+          +2 nếu chu kỳ trung bình sắp đến (kỳ vắng > avg*0.8)
+          +1 nếu là 2 số cuối ĐB trong 3 kỳ gần nhất
+          -1 nếu gan quá dài (kỳ vắng > 60)
+        """
+        ref = datetime.strptime(reference_date, "%Y-%m-%d").date()
+        d30 = (ref - timedelta(days=30)).strftime("%Y-%m-%d")
+        d7  = (ref - timedelta(days=7)).strftime("%Y-%m-%d")
+
+        freq_30 = self.get_number_frequency(d30, reference_date, province)
+        freq_7  = self.get_number_frequency(d7,  reference_date, province)
+        gan_list = self.get_gan_numbers(reference_date, province, top_n=100)
+        gan_map  = {g["number"]: g["days_absent"] for g in gan_list}
+
+        # 2 số cuối ĐB 3 kỳ gần nhất
+        if province and province != "Tất cả":
+            sql = "SELECT special_prize FROM lottery_results WHERE draw_date<=? AND province=? AND special_prize!='' ORDER BY draw_date DESC LIMIT 3"
+            params = (reference_date, province)
+        else:
+            sql = "SELECT special_prize FROM lottery_results WHERE draw_date<=? AND special_prize!='' ORDER BY draw_date DESC LIMIT 6"
+            params = (reference_date,)
+        with self._get_conn() as conn:
+            sp_rows = [r[0] for r in conn.execute(sql, params).fetchall()]
+        recent_db2 = {sp[-2:] for sp in sp_rows if sp and len(sp) >= 2}
+
+        hot_top10 = set(list(freq_30.keys())[:10])
+
+        scores: Dict[str, Dict] = {}
+        for n in [f"{i:02d}" for i in range(100)]:
+            score = 0
+            reasons = []
+
+            c7 = freq_7.get(n, 0)
+            if c7 >= 3:
+                score += 3
+                reasons.append(f"Cầu {c7} kỳ/7 ngày (+3)")
+
+            if n in hot_top10:
+                score += 2
+                reasons.append(f"Hot top10/30 ngày (+2)")
+
+            absent = gan_map.get(n, 0)
+            if absent > 60:
+                score -= 1
+                reasons.append(f"Gan {absent} kỳ (-1)")
+
+            if n in recent_db2:
+                score += 1
+                reasons.append("Theo ĐB gần nhất (+1)")
+
+            scores[n] = {"number": n, "score": score, "details": "; ".join(reasons) if reasons else "—"}
+
+        top = sorted(scores.values(), key=lambda x: x["score"], reverse=True)
+        return [x for x in top if x["score"] > 0][:top_n]
+
+    # ── Nhóm tổng ────────────────────────────────────────────────────────
+
+    def get_sum_groups(self, start_date: str, end_date: str, province: str = None) -> List[Dict]:
+        """
+        Nhóm số theo tổng 2 chữ số (0-18).
+        Trả về từng nhóm tổng kèm tần suất và các số thuộc nhóm.
+        """
+        freq = self.get_number_frequency(start_date, end_date, province)
+        groups: Dict[int, Dict] = {}
+        for i in range(19):
+            groups[i] = {"tong": i, "count": 0, "numbers": []}
+
+        for num, cnt in freq.items():
+            if len(num) == 2 and num.isdigit():
+                s = int(num[0]) + int(num[1])
+                groups[s]["count"] += cnt
+                groups[s]["numbers"].append(num)
+
+        result = []
+        for i in range(19):
+            g = groups[i]
+            # Các số cùng tổng: vd tổng 7 → 07,16,25,34,43,52,61,70
+            same_sum_nums = [f"{a}{b}" for a in range(10) for b in range(10) if a+b == i]
+            g["so_cung_tong"] = ", ".join(same_sum_nums)
+            result.append(g)
+
+        result.sort(key=lambda x: x["count"], reverse=True)
+        return result
