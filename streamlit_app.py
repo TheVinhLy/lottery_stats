@@ -385,7 +385,7 @@ def _sdf(df):
 # ══════════════════════════════════════════════════════════════════════════
 
 @st.cache_resource
-def get_db() -> Database:
+def get_db(_version: str = "v2") -> Database:
     return Database()
 
 db = get_db()
