@@ -382,6 +382,29 @@ def _sdf(df):
         [{"selector": "th", "props": [("font-size", "1.8rem"), ("background-color", "#2C3252"), ("color", "#A5B4FC")]}]
     )
 
+
+_EXCEL_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+def _to_excel(sheets: dict) -> bytes:
+    """Chuyển dict {tên_sheet: DataFrame} thành bytes Excel (.xlsx)."""
+    buf = io.BytesIO()
+    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+        for name, df in sheets.items():
+            if hasattr(df, "data"):   # Pandas Styler
+                df = df.data
+            df.to_excel(writer, sheet_name=str(name)[:31], index=False)
+    return buf.getvalue()
+
+
+def _excel_btn(sheets: dict, filename: str, key: str, label: str = "📥 Xuất Excel"):
+    """Render st.download_button xuất Excel từ dict sheets."""
+    try:
+        data = _to_excel(sheets)
+        st.download_button(label, data=data, file_name=filename,
+                           mime=_EXCEL_MIME, key=key, use_container_width=False)
+    except Exception as e:
+        st.warning(f"Không thể xuất Excel: {e}")
+
 # ══════════════════════════════════════════════════════════════════════════
 # Khởi tạo Database (cache_resource: chỉ tạo 1 lần)
 # ══════════════════════════════════════════════════════════════════════════
@@ -519,6 +542,7 @@ with tab_results:
         rows = db.get_results(
             res_from.strftime("%Y-%m-%d"), res_to.strftime("%Y-%m-%d"), res_prov)
         st.session_state["res_data"] = rows
+        st.session_state.pop("res_excel", None)   # xoá cache excel cũ
 
     rows = st.session_state.get("res_data", [])
     st.caption(f"**{len(rows):,} bản ghi**")
@@ -531,21 +555,31 @@ with tab_results:
                           "Giải 3","Giải 4","Giải 5","Giải 6","Giải 7","Giải 8"]
         st.dataframe(_sdf(df_res), use_container_width=True, height=520)
 
+        # ── Xuất Excel (có định dạng đẹp) ────────────────────────────────
         if exp_btn:
-            buf = io.BytesIO()
-            ss = res_from.strftime("%Y-%m-%d"); es = res_to.strftime("%Y-%m-%d")
-            export_results(
-                results=rows,
-                freq_data=db.get_number_frequency(ss, es, res_prov),
-                gan_data=db.get_gan_numbers(es, res_prov, 50),
-                head_tail=db.get_head_tail_stats(ss, es, res_prov),
-                output_path=buf, start_date=ss, end_date=es, province=res_prov)
-            buf.seek(0)
+            try:
+                buf = io.BytesIO()
+                ss = res_from.strftime("%Y-%m-%d"); es = res_to.strftime("%Y-%m-%d")
+                export_results(
+                    results=rows,
+                    freq_data=db.get_number_frequency(ss, es, res_prov),
+                    gan_data=db.get_gan_numbers(es, res_prov, 50),
+                    head_tail=db.get_head_tail_stats(ss, es, res_prov),
+                    output_path=buf, start_date=ss, end_date=es, province=res_prov)
+                buf.seek(0)
+                st.session_state["res_excel"] = (buf.getvalue(), ss, es)
+            except Exception as e:
+                st.error(f"Lỗi xuất Excel: {e}")
+
+        res_excel = st.session_state.get("res_excel")
+        if res_excel:
+            data, ss2, es2 = res_excel
             st.download_button(
-                "⬇️ Tải file Excel",
-                data=buf,
-                file_name=f"XoSo_{ss}_{es}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                "⬇️ Tải file Excel (có định dạng)",
+                data=data,
+                file_name=f"XoSo_{ss2}_{es2}.xlsx",
+                mime=_EXCEL_MIME,
+                key="res_dl_excel")
     else:
         st.info("Không có dữ liệu. Hãy chọn khoảng ngày rồi nhấn Xem.")
 
@@ -677,6 +711,13 @@ with tab_lo2:
             st.dataframe(_sdf(df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)),
                          use_container_width=True, height=400)
 
+        _lo2_sheets = {"Nóng": hot_df.reset_index(drop=True),
+                       "Lạnh": cold_df.reset_index(drop=True),
+                       "Tất cả": df_lo2[["Rank","Số","Lần XH","Tỷ lệ %"]].reset_index(drop=True)}
+        if gan_lo2:
+            _lo2_sheets["Gan"] = gan_df
+        _excel_btn(_lo2_sheets, "Lo2So.xlsx", "lo2_dl_excel")
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Tab 4 — Lô 3 Số
@@ -739,6 +780,11 @@ with tab_lo3:
             st.dataframe(_sdf(df_lo3.head(200).reset_index(drop=True)),
                          use_container_width=True, height=400, hide_index=True)
 
+        _lo3_sheets = {"Top30": df_top30, "Top200": df_lo3.head(200).reset_index(drop=True)}
+        if gan3:
+            _lo3_sheets["Gan"] = df_g3
+        _excel_btn(_lo3_sheets, "Lo3So.xlsx", "lo3_dl_excel")
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Tab 5 — Lô 4 Số
@@ -787,6 +833,10 @@ with tab_lo4:
             st.dataframe(_sdf(df_lo4.head(200).reset_index(drop=True)),
                          use_container_width=True, height=400, hide_index=True)
 
+        _excel_btn({"Nóng nhất": df_top30_4, "Ít gặp nhất": df_bot30_4,
+                    "Top200": df_lo4.head(200).reset_index(drop=True)},
+                   "Lo4So.xlsx", "lo4_dl_excel")
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Tab 6 — Lô 5 Số
@@ -834,6 +884,10 @@ with tab_lo5:
         with st.expander("📋 Bảng đầy đủ top 200 số 5 chữ số"):
             st.dataframe(_sdf(df_lo5.head(200).reset_index(drop=True)),
                          use_container_width=True, height=400, hide_index=True)
+
+        _excel_btn({"Nóng nhất": df_top30_5, "Ít gặp nhất": df_bot30_5,
+                    "Top200": df_lo5.head(200).reset_index(drop=True)},
+                   "Lo5So.xlsx", "lo5_dl_excel")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -900,6 +954,13 @@ with tab_special:
                 df_hist = df_hist[["date","province","number","2 Cuối","3 Cuối","Tổng"]]
                 df_hist.columns = ["Ngày","Tỉnh","Giải ĐB","2 Cuối","3 Cuối","Tổng"]
                 st.dataframe(_sdf(df_hist), use_container_width=True, height=620, hide_index=True)
+
+        _sp_sheets = {}
+        if "df_l2" in dir(): _sp_sheets["2 Cuối"] = df_l2
+        if "df_l3" in dir(): _sp_sheets["3 Cuối"] = df_l3
+        if hist: _sp_sheets["Lịch sử ĐB"] = df_hist
+        if _sp_sheets:
+            _excel_btn(_sp_sheets, "GiaiDB.xlsx", "sp_dl_excel")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -1010,6 +1071,15 @@ with tab_suggest:
             st.dataframe(_sdf(df_sg.reset_index(drop=True)), use_container_width=True,
                          height=300, hide_index=True)
 
+        _sug_sheets = {}
+        if sug_score: _sug_sheets["Điểm tổng hợp"] = pd.DataFrame(sug_score, columns=["Số","Điểm","Chi tiết"])
+        if sug_data.get("hot"): _sug_sheets["Nóng"] = pd.DataFrame(sug_data["hot"])[["number","count","reason"]]
+        if sug_data.get("cold"): _sug_sheets["Lạnh/Gan"] = pd.DataFrame(sug_data["cold"])[["number","days_absent","reason"]]
+        if sug_data.get("cau"): _sug_sheets["Cầu"] = pd.DataFrame(sug_data["cau"])[["number","count","reason"]]
+        if sug_sums: _sug_sheets["Nhóm tổng"] = df_sg
+        if _sug_sheets:
+            _excel_btn(_sug_sheets, "GoiYSo.xlsx", "sug_dl_excel")
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Tab — Cặp Số
@@ -1056,6 +1126,8 @@ with tab_pair:
                 df_comp = pd.DataFrame(comp)
                 df_comp.columns = ["Số kèm","Lần cùng nhau"]
                 st.dataframe(_sdf(df_comp), use_container_width=True, hide_index=True)
+
+        _excel_btn({"Cặp số": df_pair}, "CapSo.xlsx", "pair_dl_excel")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -1105,6 +1177,7 @@ with tab_dow:
             pivot["Tổng"] = pivot.sum(axis=1)
             pivot = pivot.sort_values("Tổng", ascending=False).head(30)
             st.dataframe(pivot, use_container_width=True, height=500)
+            _excel_btn({"Theo thứ": pivot.reset_index()}, "TheoThu.xlsx", "dow_dl_excel")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -1184,6 +1257,10 @@ with tab_cycle:
                     st.markdown(f"- Lần đầu: **{dates[0]}**")
                     st.markdown(f"- Lần cuối: **{dates[-1]}**")
 
+        if cyc_data.get("total", 0) > 0 and cyc_data.get("dates"):
+            _excel_btn({f"Chu kỳ số {num_shown}": df_cyc},
+                       f"ChuKy_{num_shown}.xlsx", "cyc_dl_excel")
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Tab 10 — Đầu Đuôi
@@ -1242,3 +1319,7 @@ with tab_headtail:
                                   columns=[f"Đuôi {t}" for t in range(10)])
 
             st.dataframe(df_mat, use_container_width=True)
+
+        _excel_btn({"Cầu đầu": df_head, "Cầu đuôi": df_tail,
+                    "Ma trận Đầu-Đuôi": df_mat.reset_index().rename(columns={"index":"Đầu"})},
+                   "ĐầuĐuôi.xlsx", "ht_dl_excel")
