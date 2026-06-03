@@ -4,6 +4,8 @@ on:
   schedule:
     # Chạy ngày 1 mỗi tháng lúc 0:00 UTC
     - cron: "0 0 1 * *"
+    # Ping Streamlit app mỗi 6 giờ để không bị ngủ
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -14,3 +16,10 @@ jobs:
     steps:
       - name: Keep workflows alive
         uses: gautamkrishnar/keepalive-workflow@v2
+
+  ping-streamlit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit app to prevent sleep
+        run: |
+          curl -s -o /dev/null -w "HTTP %{http_code}" https://thongkexs.streamlit.app/ || true
