@@ -96,12 +96,12 @@ st.markdown("""
     body, p, span, div, label {
         color: #CBD5E1 !important;
         font-family: 'Inter', 'Segoe UI', sans-serif;
-        font-size: 1.45rem !important;
+        font-size: 1.05rem !important;
     }
 
     /* ── Header / title ── */
     h1, h2, h3, h4 { color: #E2E8F0 !important; font-weight: 700; }
-    h2 { font-size: 1.75rem !important; }
+    h2 { font-size: 1.4rem !important; }
 
     /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
@@ -115,7 +115,7 @@ st.markdown("""
         border-radius: 8px 8px 0 0;
         padding: 7px 18px;
         font-weight: 600;
-        font-size: 1.35rem;
+        font-size: 0.92rem;
         color: #94A3B8 !important;
         border: none;
         transition: background 0.15s;
@@ -144,12 +144,12 @@ st.markdown("""
     }
     div[data-testid="metric-container"] [data-testid="stMetricValue"] {
         color: #818CF8 !important;
-        font-size: 2.5rem !important;
+        font-size: 2.1rem !important;
         font-weight: 700;
     }
     div[data-testid="metric-container"] [data-testid="stMetricLabel"] {
         color: #94A3B8 !important;
-        font-size: 1.35rem !important;
+        font-size: 0.92rem !important;
     }
 
     /* ── Buttons ── */
@@ -159,7 +159,6 @@ st.markdown("""
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
-        font-size: 1.35rem !important;
         padding: 0.4rem 1rem !important;
         box-shadow: 0 2px 6px rgba(67,56,202,0.4);
         transition: all 0.15s;
@@ -305,12 +304,12 @@ st.markdown("""
         background-color: #2C3252 !important;
         color: #A5B4FC !important;
         font-weight: 600;
-        font-size: 1.5rem !important;
+        font-size: 1.6rem !important;
         border-bottom: 2px solid #4338CA !important;
     }
     /* Alternating rows: chẵn đậm, lẻ nhạt hơn */
-    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.5rem !important; }
-    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.5rem !important; }
+    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.6rem !important; }
+    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.6rem !important; }
     .stDataFrame tbody tr:hover td { background-color: #2C3252 !important; }
 
     /* ── Căn nút hàng filter ngang hàng input ── */
@@ -325,7 +324,7 @@ st.markdown("""
     .stError   { background-color: #2D0F14 !important; border-left: 4px solid #F87171 !important; }
 
     /* ── Caption / divider ── */
-    .stCaption { color: #64748B !important; font-size: 1.2rem !important; }
+    .stCaption { color: #64748B !important; font-size: 0.88rem !important; }
     hr { border-color: #374151 !important; margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
 
     /* ── Căn nút Phân Tích ngang hàng với input ── */
