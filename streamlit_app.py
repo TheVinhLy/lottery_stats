@@ -304,12 +304,12 @@ st.markdown("""
         background-color: #2C3252 !important;
         color: #A5B4FC !important;
         font-weight: 600;
-        font-size: 1.6rem !important;
+        font-size: 1.8rem !important;
         border-bottom: 2px solid #4338CA !important;
     }
     /* Alternating rows: chẵn đậm, lẻ nhạt hơn */
-    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.6rem !important; }
-    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.6rem !important; }
+    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.8rem !important; }
+    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.8rem !important; }
     .stDataFrame tbody tr:hover td { background-color: #2C3252 !important; }
 
     /* ── Căn nút hàng filter ngang hàng input ── */
@@ -377,8 +377,10 @@ def _sdf(df):
     """Màu xen kẽ dòng cho dataframe qua Pandas Styler."""
     def _alt(row):
         color = "#232840" if row.name % 2 == 0 else "#1B2035"
-        return [f"background-color: {color}; color: #CBD5E1"] * len(row)
-    return df.style.apply(_alt, axis=1)
+        return [f"background-color: {color}; color: #CBD5E1; font-size: 1.8rem"] * len(row)
+    return df.style.apply(_alt, axis=1).set_table_styles(
+        [{"selector": "th", "props": [("font-size", "1.8rem"), ("background-color", "#2C3252"), ("color", "#A5B4FC")]}]
+    )
 
 # ══════════════════════════════════════════════════════════════════════════
 # Khởi tạo Database (cache_resource: chỉ tạo 1 lần)
