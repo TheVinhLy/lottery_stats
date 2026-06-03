@@ -96,12 +96,12 @@ st.markdown("""
     body, p, span, div, label {
         color: #CBD5E1 !important;
         font-family: 'Inter', 'Segoe UI', sans-serif;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
 
     /* ── Header / title ── */
     h1, h2, h3, h4 { color: #E2E8F0 !important; font-weight: 700; }
-    h2 { font-size: 1.4rem !important; }
+    h2 { font-size: 1.75rem !important; }
 
     /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
@@ -115,7 +115,7 @@ st.markdown("""
         border-radius: 8px 8px 0 0;
         padding: 7px 18px;
         font-weight: 600;
-        font-size: 1.12rem;
+        font-size: 1.35rem;
         color: #94A3B8 !important;
         border: none;
         transition: background 0.15s;
@@ -144,12 +144,12 @@ st.markdown("""
     }
     div[data-testid="metric-container"] [data-testid="stMetricValue"] {
         color: #818CF8 !important;
-        font-size: 2.1rem !important;
+        font-size: 2.5rem !important;
         font-weight: 700;
     }
     div[data-testid="metric-container"] [data-testid="stMetricLabel"] {
         color: #94A3B8 !important;
-        font-size: 1.12rem !important;
+        font-size: 1.35rem !important;
     }
 
     /* ── Buttons ── */
@@ -159,6 +159,7 @@ st.markdown("""
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
+        font-size: 1.35rem !important;
         padding: 0.4rem 1rem !important;
         box-shadow: 0 2px 6px rgba(67,56,202,0.4);
         transition: all 0.15s;
@@ -180,7 +181,7 @@ st.markdown("""
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
         color: #F1F5F9 !important;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
     .stSelectbox > div > div,
     .stSelectbox [data-baseweb="select"] > div {
@@ -188,13 +189,13 @@ st.markdown("""
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
         color: #F1F5F9 !important;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
     /* Chữ hiển thị trong ô selectbox đã chọn */
     .stSelectbox [data-baseweb="select"] span,
     .stSelectbox [data-baseweb="select"] div {
         color: #F1F5F9 !important;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
     /* ── Dropdown list khi mở ra ── */
     [data-baseweb="popover"] [data-baseweb="menu"] {
@@ -203,7 +204,7 @@ st.markdown("""
     [data-baseweb="option"] {
         background-color: #2C3252 !important;
         color: #818CF8 !important;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
     [data-baseweb="option"] * {
         color: #818CF8 !important;
@@ -215,7 +216,7 @@ st.markdown("""
     [role="listbox"] li,
     [role="listbox"] span {
         color: #818CF8 !important;
-        font-size: 1.25rem !important;
+        font-size: 1.45rem !important;
     }
     [data-baseweb="option"]:hover {
         background-color: #3D4A7A !important;
@@ -241,14 +242,14 @@ st.markdown("""
     [data-baseweb="calendar"] button {
         background-color: #2C3252 !important;
         color: #F1F5F9 !important;
-        font-size: 1.2rem !important;
+        font-size: 1.4rem !important;
     }
     /* Ngày bình thường */
     [data-baseweb="calendar"] [role="gridcell"] > div,
     [data-baseweb="calendar"] [role="button"] {
         background-color: transparent !important;
         color: #F1F5F9 !important;
-        font-size: 1.2rem !important;
+        font-size: 1.4rem !important;
     }
     /* Hover ngày */
     [data-baseweb="calendar"] [role="button"]:hover {
@@ -304,12 +305,12 @@ st.markdown("""
         background-color: #2C3252 !important;
         color: #A5B4FC !important;
         font-weight: 600;
-        font-size: 1.3rem !important;
+        font-size: 1.5rem !important;
         border-bottom: 2px solid #4338CA !important;
     }
     /* Alternating rows: chẵn đậm, lẻ nhạt hơn */
-    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.3rem !important; }
-    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.3rem !important; }
+    .stDataFrame tbody tr:nth-child(odd)  td { background-color: #1B1F2E !important; font-size: 1.5rem !important; }
+    .stDataFrame tbody tr:nth-child(even) td { background-color: #232840 !important; font-size: 1.5rem !important; }
     .stDataFrame tbody tr:hover td { background-color: #2C3252 !important; }
 
     /* ── Căn nút hàng filter ngang hàng input ── */
@@ -324,7 +325,7 @@ st.markdown("""
     .stError   { background-color: #2D0F14 !important; border-left: 4px solid #F87171 !important; }
 
     /* ── Caption / divider ── */
-    .stCaption { color: #64748B !important; font-size: 0.88rem !important; }
+    .stCaption { color: #64748B !important; font-size: 1.2rem !important; }
     hr { border-color: #374151 !important; margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
 
     /* ── Căn nút Phân Tích ngang hàng với input ── */
