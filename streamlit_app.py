@@ -181,7 +181,7 @@ st.markdown("""
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
         color: #F1F5F9 !important;
-        font-size: 1.45rem !important;
+        font-size: 1.1rem !important;
     }
     .stSelectbox > div > div,
     .stSelectbox [data-baseweb="select"] > div {
@@ -189,13 +189,13 @@ st.markdown("""
         border: 1px solid #374151 !important;
         border-radius: 6px !important;
         color: #F1F5F9 !important;
-        font-size: 1.45rem !important;
+        font-size: 1.1rem !important;
     }
     /* Chữ hiển thị trong ô selectbox đã chọn */
     .stSelectbox [data-baseweb="select"] span,
     .stSelectbox [data-baseweb="select"] div {
         color: #F1F5F9 !important;
-        font-size: 1.45rem !important;
+        font-size: 1.1rem !important;
     }
     /* ── Dropdown list khi mở ra ── */
     [data-baseweb="popover"] [data-baseweb="menu"] {
@@ -503,7 +503,7 @@ with tab_update:
 # ══════════════════════════════════════════════════════════════════════════
 
 with tab_results:
-    r_c1, r_c2, r_c3, r_c4, r_c5 = st.columns([2, 2, 3, 1, 1])
+    r_c1, r_c2, r_c3, r_c4, r_c5 = st.columns([2, 2, 3, 1.2, 1.2])
     with r_c1: res_from = st.date_input("Từ", date.today(), key="res_from")
     with r_c2: res_to   = st.date_input("Đến", date.today(), key="res_to")
     with r_c3: res_prov = st.selectbox("Tỉnh", PROV_LIST, key="res_prov")
@@ -555,7 +555,7 @@ with tab_results:
 
 def _filter_row(prefix: str, default_days: int = 90):
     """Thanh filter ngày + tỉnh dùng chung cho các tab thống kê."""
-    c1, c2, c3, c4 = st.columns([2, 2, 3, 1])
+    c1, c2, c3, c4 = st.columns([2, 2, 3, 1.5])
     with c1: d_from = st.date_input("Từ", date(2026, 1, 1), key=f"{prefix}_from")
     with c2: d_to   = st.date_input("Đến", date.today(), key=f"{prefix}_to")
     with c3: prov   = st.selectbox("Tỉnh", PROV_LIST, key=f"{prefix}_prov")
