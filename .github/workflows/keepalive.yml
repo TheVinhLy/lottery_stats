@@ -4,8 +4,8 @@ on:
   schedule:
     # Chạy ngày 1 mỗi tháng lúc 0:00 UTC
     - cron: "0 0 1 * *"
-    # Ping Streamlit app mỗi 6 giờ để không bị ngủ
-    - cron: "0 */6 * * *"
+    # Ping Streamlit app mỗi 3 giờ để không bị ngủ
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 jobs:
