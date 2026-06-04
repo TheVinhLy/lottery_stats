@@ -25,6 +25,35 @@ jobs:
   ping-streamlit:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Streamlit app to prevent sleep
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Playwright
         run: |
-          curl -s -o /dev/null -w "HTTP %{http_code}" https://thongkexs.streamlit.app/ || true
+          pip install playwright
+          playwright install chromium --with-deps
+      - name: Wake up Streamlit app
+        run: |
+          python - <<'EOF'
+          import asyncio
+          from playwright.async_api import async_playwright
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch()
+                  page = await browser.new_page()
+                  try:
+                      await page.goto('https://thongkexs.streamlit.app/', timeout=60000)
+                      await page.wait_for_timeout(3000)
+                      btn = page.get_by_text('Yes, get this app back up!')
+                      if await btn.is_visible():
+                          await btn.click()
+                          print('Clicked wake up button - app is waking up')
+                          await page.wait_for_timeout(20000)
+                      else:
+                          print('App is already running')
+                  finally:
+                      await browser.close()
+
+          asyncio.run(main())
+          EOF
